@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Devices {
+  id          String       @id @db.VarChar(40)
+  ward        String       @default("WID-DEVELOPMENT") @db.VarChar(100)
+  hospital    String       @default("HID-DEVELOPMENT") @db.VarChar(100)
+  staticName  String       @unique @default(uuid()) @db.VarChar(100)
+  name        String?      @db.VarChar(255)
+  status      Boolean      @default(false)
+  seq         Int          @unique @default(autoincrement()) @db.Integer
+  location    String?      @db.VarChar(255)
+  position    String?      @db.VarChar(255)
+  positionPic String?      @db.VarChar(255)
+  installDate DateTime?    @default(now())
+  firmware    String       @default("1.0.0") @db.VarChar(10)
+  remark      String?      @db.VarChar(255)
+  online      Boolean      @default(false)
+  tag         String?      @db.VarChar(100)
+  createAt    DateTime     @default(now())
+  updateAt    DateTime     @default(now()) @updatedAt
+  config      Configs?
+  repair      Repairs[]
+  warranty    Warranties[]
+  probe       Probes[]
+}
+
+model Probes {
+  id                    String   @id @default(uuid()) @db.VarChar(100)
+  sn                    String   @db.VarChar(40)
+  name                  String?  @db.VarChar(255)
+  type                  String?  @db.VarChar(50)
+  channel               String   @default("1") @db.Char(1)
+  tempMin               Float    @default(0.00)
+  tempMax               Float    @default(0.00)
+  humiMin               Float    @default(0.00)
+  humiMax               Float    @default(0.00)
+  tempAdj               Float    @default(0.00)
+  humiAdj               Float    @default(0.00)
+  stampTime             String?  @db.VarChar(50)
+  doorQty               Int      @default(1) @db.SmallInt
+  position              String?  @db.VarChar(250)
+  muteAlarmDuration     String?  @db.VarChar(50)
+  doorSound             Boolean  @default(true)
+  doorAlarmTime         String?  @db.VarChar(3)
+  muteDoorAlarmDuration String?  @db.VarChar(50)
+  notiDelay             Int      @default(0) @db.SmallInt //ดีเลการส่งแจ้งเตือน 0 คือส่งทันที
+  notiToNormal          Boolean  @default(true) //ส่งแจ้งเตือนหลังอุณหภูมิกลับมาปกติ
+  notiMobile            Boolean  @default(true) //เปิดปิดการแจ้งเตือนไปยังมือถือ
+  notiRepeat            Int      @default(1) @db.SmallInt //ตั้งค่าการส่งซ้ำ ค่าเริ่มต้นคือ 1
+  firstDay              Day      @default(OFF)
+  secondDay             Day      @default(OFF)
+  thirdDay              Day      @default(OFF)
+  firstTime             String?  @default("0000") @db.VarChar(4)
+  secondTime            String?  @default("0000") @db.VarChar(4)
+  thirdTime             String?  @default("0000") @db.VarChar(4)
+  createAt              DateTime @default(now())
+  updateAt              DateTime @default(now()) @updatedAt
+  device                Devices  @relation(fields: [sn], references: [id], onDelete: Cascade)
+}
+
+model Configs {
+  id         String   @id @default(uuid()) @db.VarChar(100)
+  sn         String   @unique @db.VarChar(100)
+  dhcp       Boolean  @default(true)
+  ip         String?  @db.VarChar(50)
+  mac        String?  @db.VarChar(20)
+  subnet     String?  @db.VarChar(50)
+  gateway    String?  @db.VarChar(50)
+  dns        String?  @db.VarChar(50)
+  dhcpEth    String?  @db.VarChar(50)
+  ipEth      String?  @db.VarChar(50)
+  macEth     String?  @db.VarChar(20)
+  subnetEth  String?  @db.VarChar(50)
+  gatewayEth String?  @db.VarChar(50)
+  dnsEth     String?  @db.VarChar(50)
+  ssid       String?  @default("RDE2_2.4GHz") @db.VarChar(50)
+  password   String?  @default("rde05012566") @db.VarChar(50)
+  simSP      String?  @db.VarChar(100)
+  email1     String?  @db.VarChar(200)
+  email2     String?  @db.VarChar(200)
+  email3     String?  @db.VarChar(200)
+  hardReset  String?  @default("0200") @db.VarChar(4) //ตั้งค่าเวลาที่ต้องการให้เครื่อง reset ตัวเอง
+  createAt   DateTime @default(now())
+  updateAt   DateTime @default(now()) @updatedAt
+  device     Devices  @relation(fields: [sn], references: [id], onDelete: Cascade)
+}
+
+model Repairs {
+  id             String   @id @default(uuid()) @db.VarChar(100)
+  seq            Int      @unique @default(autoincrement()) @db.Integer // เล่มที่
+  devName        String   @db.VarChar(100)
+  info           String?  @db.VarChar(155)
+  info1          String?  @db.VarChar(155)
+  info2          String?  @db.VarChar(155)
+  address        String?  @db.VarChar(155) // โรงพยาบาลที่แจ้ง
+  ward           String?  @db.VarChar(155) // หอผู้ป่วย
+  detail         String?  @db.VarChar(155)
+  phone          String?  @db.VarChar(20)
+  status         String?  @db.VarChar(155)
+  warrantyStatus String?  @db.VarChar(30)
+  remark         String?  @db.VarChar(155)
+  createAt       DateTime @default(now())
+  updateAt       DateTime @default(now()) @updatedAt
+  device         Devices  @relation(fields: [devName], references: [staticName], onDelete: Cascade)
+}
+
+model Warranties {
+  id              String   @id @default(uuid()) @db.VarChar(100)
+  devName         String   @db.VarChar(100)
+  product         String?  @db.VarChar(255)
+  model           String?  @db.VarChar(255)
+  installDate     String?  @db.VarChar(255)
+  customerName    String?  @db.VarChar(255)
+  customerAddress String?  @db.VarChar(500)
+  saleDepartment  String?  @db.VarChar(100)
+  invoice         String?  @db.VarChar(50)
+  expire          DateTime @default(now())
+  status          Boolean  @default(true)
+  createAt        DateTime @default(now())
+  updateAt        DateTime @default(now()) @updatedAt
+  device          Devices  @relation(fields: [devName], references: [staticName], onDelete: Cascade)
+}
+
+enum Day {
+  OFF
+  ALL
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
