@@ -1,4 +1,6 @@
 import { IsNotEmpty, IsString, MaxLength, IsOptional, IsDate, IsNumber, IsBoolean } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { dateFormat } from '../../common/utils';
 
 export class CreateWarrantyDto {
   @IsOptional()
@@ -47,6 +49,7 @@ export class CreateWarrantyDto {
   invoice: string;
 
   @IsOptional()
+  @Transform(({ value }) => dateFormat((value)))
   @IsDate()
   expire: Date;
 

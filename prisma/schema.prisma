@@ -35,6 +35,7 @@ model Devices {
   repair      Repairs[]
   warranty    Warranties[]
   probe       Probes[]
+  log         LogDays[]
 }
 
 model Probes {
@@ -132,6 +133,28 @@ model Warranties {
   createAt        DateTime @default(now())
   updateAt        DateTime @default(now()) @updatedAt
   device          Devices  @relation(fields: [devName], references: [staticName], onDelete: Cascade)
+}
+
+model LogDays {
+  id              String   @id @default(uuid()) @db.VarChar(100)
+  serial          String   @db.VarChar(100)
+  temp            Float    @default(0.00)
+  tempDisplay     Float    @default(0.00)
+  humidity        Float    @default(0.00)
+  humidityDisplay Float    @default(0.00)
+  sendTime        DateTime @default(now())
+  plug            Boolean  @default(false)
+  door1           Boolean  @default(false)
+  door2           Boolean  @default(false)
+  door3           Boolean  @default(false)
+  internet        Boolean  @default(false)
+  probe           String   @default("1") @db.VarChar(10)
+  battery         Int      @default(0) @db.SmallInt
+  tempInternal    Float?   @default(0.00)
+  extMemory       Boolean  @default(false)
+  createAt        DateTime @default(now())
+  updateAt        DateTime @default(now()) @updatedAt
+  device          Devices  @relation(fields: [serial], references: [id])
 }
 
 enum Day {

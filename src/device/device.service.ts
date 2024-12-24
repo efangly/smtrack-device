@@ -38,16 +38,36 @@ export class DeviceService {
     });
   }
 
-  async findAll(user: JwtPayloadDto) {
+  async findAll(wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
     const { conditions, key } = this.findCondition(user);
-    const cache = await this.redis.get(key);
+    const cache = await this.redis.get(wardId ? wardId : key);
     if (cache) return JSON.parse(cache);
-    const device = await this.prisma.devices.findMany({ 
-      where: conditions,
-      orderBy: { seq: 'asc' }
-    });
-    await this.redis.set(key, JSON.stringify(device), 3600 * 10);
-    return device;
+    const [devices, total] = await this.prisma.$transaction([
+      this.prisma.devices.findMany({ 
+        skip: page ? (parseInt(page) - 1) * parseInt(perpage) : 0,
+        take: perpage ? parseInt(perpage) : 10,
+        where: wardId ? { ward: wardId ? wardId : undefined } : conditions,
+        include: { 
+          probe: true, 
+          config: true,
+          warranty: { select: { expire: true } },
+          log: { take: 1, orderBy: { createAt: 'desc' } }
+        },
+        orderBy: { seq: 'asc' }
+      }),
+      this.prisma.devices.count({ where: wardId ? { ward: wardId ? wardId : undefined } : conditions })
+    ]);
+    this.redis.set(wardId ? wardId : key, JSON.stringify({ total, devices }), 10)
+    return { total, devices };
+  }
+
+  async findDashboard(user: JwtPayloadDto) {
+    const { conditions } = this.findCondition(user);
+    const [warranties, repairs] = await this.prisma.$transaction([
+      this.prisma.warranties.count({ where: { device: conditions } }),
+      this.prisma.repairs.count({ where: { device: conditions } })
+    ]);
+    return { warranties, repairs }; 
   }
 
   async findOne(id: string) {

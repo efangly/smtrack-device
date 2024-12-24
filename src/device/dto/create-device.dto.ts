@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsBoolean, MaxLength, IsOptional, IsDate, IsNumber } from 'class-validator';
+import { IsString, IsBoolean, MaxLength, IsOptional, IsDate, IsNumber } from 'class-validator';
 
 export class CreateDeviceDto {
   @IsOptional()

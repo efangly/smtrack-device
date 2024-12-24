@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request, Query } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateDeviceDto } from './dto/create-device.dto';
@@ -22,9 +22,9 @@ export class DeviceController {
   }
 
   @Get()
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
-  async findAll(@Request() req: { user: JwtPayloadDto }) {
-    return this.deviceService.findAll(req.user);
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.USER)
+  async findAll(@Query('ward') ward: string, @Query('page') page: string, @Query('perpage') perpage: string,@Request() req: { user: JwtPayloadDto }) {
+    return this.deviceService.findAll(ward, page, perpage, req.user);
   }
 
   @Get(':id')
@@ -33,8 +33,13 @@ export class DeviceController {
     return this.deviceService.findOne(id);
   }
 
+  @Get('dashboard/count')
+  async getDashboard(@Request() req: { user: JwtPayloadDto }) {
+    return this.deviceService.findDashboard(req.user);
+  }
+
   @Put(':id')
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   @UseInterceptors(FileInterceptor('image'))
   async update(@Param('id') id: string, @Body() updateDeviceDto: UpdateDeviceDto, @UploadedFile() file: Express.Multer.File) {
     return this.deviceService.update(id, updateDeviceDto, file);

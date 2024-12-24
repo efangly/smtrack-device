@@ -129,6 +129,30 @@ CREATE TABLE "Warranties" (
     CONSTRAINT "Warranties_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "LogDays" (
+    "id" VARCHAR(100) NOT NULL,
+    "serial" VARCHAR(100) NOT NULL,
+    "temp" DOUBLE PRECISION NOT NULL DEFAULT 0.00,
+    "tempDisplay" DOUBLE PRECISION NOT NULL DEFAULT 0.00,
+    "humidity" DOUBLE PRECISION NOT NULL DEFAULT 0.00,
+    "humidityDisplay" DOUBLE PRECISION NOT NULL DEFAULT 0.00,
+    "sendTime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "plug" BOOLEAN NOT NULL DEFAULT false,
+    "door1" BOOLEAN NOT NULL DEFAULT false,
+    "door2" BOOLEAN NOT NULL DEFAULT false,
+    "door3" BOOLEAN NOT NULL DEFAULT false,
+    "internet" BOOLEAN NOT NULL DEFAULT false,
+    "probe" VARCHAR(10) NOT NULL DEFAULT '1',
+    "battery" SMALLINT NOT NULL DEFAULT 0,
+    "tempInternal" DOUBLE PRECISION DEFAULT 0.00,
+    "extMemory" BOOLEAN NOT NULL DEFAULT false,
+    "createAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updateAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "LogDays_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Devices_staticName_key" ON "Devices"("staticName");
 
@@ -152,3 +176,6 @@ ALTER TABLE "Repairs" ADD CONSTRAINT "Repairs_devName_fkey" FOREIGN KEY ("devNam
 
 -- AddForeignKey
 ALTER TABLE "Warranties" ADD CONSTRAINT "Warranties_devName_fkey" FOREIGN KEY ("devName") REFERENCES "Devices"("staticName") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "LogDays" ADD CONSTRAINT "LogDays_serial_fkey" FOREIGN KEY ("serial") REFERENCES "Devices"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

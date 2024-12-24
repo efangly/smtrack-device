@@ -18,7 +18,7 @@ export class ProbeService {
   }
 
   findOne(id: string) {
-    return this.prisma.probes.findUnique({ where: { id } });
+    return this.prisma.probes.findMany({ where: { sn: id } });
   }
 
   update(id: string, probeDto: UpdateProbeDto) {
