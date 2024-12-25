@@ -7,15 +7,28 @@ import { uploadFile, dateFormat } from '../common/utils';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Prisma } from '@prisma/client';
 import axios from 'axios';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class DeviceService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) {}
+  constructor(
+    private readonly prisma: PrismaService, 
+    private readonly redis: RedisService,
+    private readonly jwtService: JwtService
+  ) {}
   async create(deviceDto: CreateDeviceDto, file: Express.Multer.File) {
     if (file) deviceDto.positionPic = await uploadFile(file, 'devices');
     deviceDto.createAt = dateFormat(new Date());
     deviceDto.updateAt = dateFormat(new Date());
+    deviceDto.token = this.jwtService.sign({ 
+      sn: deviceDto.id, 
+      ward: deviceDto.ward, 
+      hospital: deviceDto.hospital 
+    }, { 
+      secret: process.env.DEVICE_SECRET 
+    });
     await this.redis.del("device");
+    await this.redis.del("listdevice");
     return this.prisma.devices.create({ 
       data: {
         ...deviceDto,
@@ -57,7 +70,7 @@ export class DeviceService {
       }),
       this.prisma.devices.count({ where: wardId ? { ward: wardId ? wardId : undefined } : conditions })
     ]);
-    this.redis.set(wardId ? wardId : key, JSON.stringify({ total, devices }), 10)
+    await this.redis.set(wardId ? wardId : key, JSON.stringify({ total, devices }), 10);
     return { total, devices };
   }
 
@@ -68,6 +81,19 @@ export class DeviceService {
       this.prisma.repairs.count({ where: { device: conditions } })
     ]);
     return { warranties, repairs }; 
+  }
+
+  async deviceList(user: JwtPayloadDto) {
+    const { conditions, key } = this.findCondition(user);
+    const cache = await this.redis.get(`list${key}`);
+    if (cache) return JSON.parse(cache);
+    const device = await this.prisma.devices.findMany({ 
+      select: { id: true, name: true, ward: true },
+      where: conditions,
+      orderBy: { seq: 'asc' }
+    });
+    await this.redis.set(`list${key}`, JSON.stringify(device), 3600 * 6);
+    return device; 
   }
 
   async findOne(id: string) {

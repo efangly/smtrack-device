@@ -23,8 +23,9 @@ import { JwtStrategy, DeviceStrategy } from './common/strategies';
     ProbeModule, 
     DeviceModule, 
     ConfigsModule, 
-    HealthModule, LogdayModule
+    HealthModule, 
+    LogdayModule
   ],
-  providers: [JwtStrategy, DeviceStrategy],
+  providers: [JwtStrategy, DeviceStrategy]
 })
 export class AppModule {}

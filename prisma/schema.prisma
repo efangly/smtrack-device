@@ -29,6 +29,7 @@ model Devices {
   remark      String?      @db.VarChar(255)
   online      Boolean      @default(false)
   tag         String?      @db.VarChar(100)
+  token       String?      @db.VarChar(255)
   createAt    DateTime     @default(now())
   updateAt    DateTime     @default(now()) @updatedAt
   config      Configs?

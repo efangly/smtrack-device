@@ -38,6 +38,11 @@ export class DeviceController {
     return this.deviceService.findDashboard(req.user);
   }
 
+  @Get('dashboard/device')
+  async getDeviceList(@Request() req: { user: JwtPayloadDto }) {
+    return this.deviceService.deviceList(req.user);
+  }
+
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   @UseInterceptors(FileInterceptor('image'))

@@ -71,6 +71,11 @@ export class CreateDeviceDto {
   @IsString()
   @MaxLength(100)
   tag: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  token: string;
   
   @IsDate()
   @IsOptional()
