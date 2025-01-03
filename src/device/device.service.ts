@@ -6,8 +6,9 @@ import { RedisService } from '../redis/redis.service';
 import { uploadFile, dateFormat } from '../common/utils';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Prisma } from '@prisma/client';
-import axios from 'axios';
 import { JwtService } from '@nestjs/jwt';
+import axios from 'axios';
+
 
 @Injectable()
 export class DeviceService {
@@ -20,13 +21,7 @@ export class DeviceService {
     if (file) deviceDto.positionPic = await uploadFile(file, 'devices');
     deviceDto.createAt = dateFormat(new Date());
     deviceDto.updateAt = dateFormat(new Date());
-    deviceDto.token = this.jwtService.sign({ 
-      sn: deviceDto.id, 
-      ward: deviceDto.ward, 
-      hospital: deviceDto.hospital 
-    }, { 
-      secret: process.env.DEVICE_SECRET 
-    });
+    deviceDto.token = this.jwtService.sign({ sn: deviceDto.id}, { secret: process.env.DEVICE_SECRET });
     await this.redis.del("device");
     await this.redis.del("listdevice");
     return this.prisma.devices.create({ 
@@ -97,7 +92,17 @@ export class DeviceService {
   }
 
   async findOne(id: string) {
-    return this.prisma.devices.findUnique({ where: { id } });
+    const log = await axios.get(`${process.env.LOG_URL}/logday/${id}`);
+    const device = await this.prisma.devices.findUnique({ 
+      where: { id }, 
+      include: { 
+        probe: true, 
+        config: true,
+        warranty: { select: { expire: true } },
+        repair: true
+      } 
+    });
+    return { ...device, log: log.data.data };
   }
 
   async update(id: string, deviceDto: UpdateDeviceDto, file: Express.Multer.File) {

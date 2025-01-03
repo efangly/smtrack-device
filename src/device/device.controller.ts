@@ -8,6 +8,7 @@ import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { SkipInterceptor } from '../common/decorators';
 
 @Controller('device')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -28,12 +29,12 @@ export class DeviceController {
   }
 
   @Get(':id')
-  @Roles(Role.SUPER, Role.SERVICE)
   async findOne(@Param('id') id: string) {
     return this.deviceService.findOne(id);
   }
 
   @Get('dashboard/count')
+  @SkipInterceptor()
   async getDashboard(@Request() req: { user: JwtPayloadDto }) {
     return this.deviceService.findDashboard(req.user);
   }
