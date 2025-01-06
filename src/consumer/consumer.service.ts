@@ -22,8 +22,6 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
       try {
         const log = JSON.parse(payload.content.toString()) as CreateLogdayDto;
         log.sendTime = dateFormat(log.sendTime);
-        log.createAt = dateFormat(new Date());
-        log.updateAt = dateFormat(new Date());
         await this.prisma.logDays.create({ data: log });
         channel.ack(payload);
       } catch (err) {
