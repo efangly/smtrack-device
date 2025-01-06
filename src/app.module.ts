@@ -11,6 +11,8 @@ import { RepairModule } from './repair/repair.module';
 import { HealthModule } from './health/health.module';
 import { LogdayModule } from './logday/logday.module';
 import { JwtStrategy, DeviceStrategy } from './common/strategies';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
+import { ConsumerModule } from './consumer/consumer.module';
 
 @Module({
   imports: [
@@ -24,7 +26,9 @@ import { JwtStrategy, DeviceStrategy } from './common/strategies';
     DeviceModule, 
     ConfigsModule, 
     HealthModule, 
-    LogdayModule
+    LogdayModule, 
+    RabbitmqModule, 
+    ConsumerModule
   ],
   providers: [JwtStrategy, DeviceStrategy]
 })

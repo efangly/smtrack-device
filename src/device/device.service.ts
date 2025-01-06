@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,24 +7,29 @@ import { uploadFile, dateFormat } from '../common/utils';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
 import axios from 'axios';
-
 
 @Injectable()
 export class DeviceService {
   constructor(
     private readonly prisma: PrismaService, 
     private readonly redis: RedisService,
-    private readonly jwtService: JwtService
+    private readonly jwt: JwtService,
+    private readonly rabbitmq: RabbitmqService
   ) {}
   async create(deviceDto: CreateDeviceDto, file: Express.Multer.File) {
     if (file) deviceDto.positionPic = await uploadFile(file, 'devices');
+    const device = await this.prisma.devices.findUnique({ where: { id: deviceDto.id } });
+    if (device) throw new BadRequestException('Device already exists');
+    const seq = await this.prisma.devices.findMany({ take: 1, orderBy: { createAt: 'desc' } });
+    deviceDto.seq = seq.length === 0 ? 1 : seq[0].seq + 1;
     deviceDto.createAt = dateFormat(new Date());
     deviceDto.updateAt = dateFormat(new Date());
-    deviceDto.token = this.jwtService.sign({ sn: deviceDto.id}, { secret: process.env.DEVICE_SECRET });
+    deviceDto.token = this.jwt.sign({ sn: deviceDto.id}, { secret: process.env.DEVICE_SECRET });
     await this.redis.del("device");
     await this.redis.del("listdevice");
-    return this.prisma.devices.create({ 
+    const result = await this.prisma.devices.create({ 
       data: {
         ...deviceDto,
         probe: {
@@ -44,6 +49,21 @@ export class DeviceService {
       },
       include: { probe: true, config: true }
     });
+    this.rabbitmq.send(
+      "add-device", 
+      JSON.stringify({ 
+        id: result.id, 
+        hospital: result.hospital, 
+        ward: result.ward,
+        staticName: result.staticName,
+        name: result.name,
+        status: result.status,
+        seq: result.seq,
+        firmware: result.firmware,
+        remark: result.remark
+      })
+    );
+    return result;
   }
 
   async findAll(wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
@@ -69,13 +89,14 @@ export class DeviceService {
     return { total, devices };
   }
 
-  async findDashboard(user: JwtPayloadDto) {
+  async findDashboard(user: JwtPayloadDto, token: string) {
     const { conditions } = this.findCondition(user);
+    const result = await axios.get(`${process.env.LOG_URL}/notification/dashboard/count`, { headers: { Authorization: token } });
     const [warranties, repairs] = await this.prisma.$transaction([
       this.prisma.warranties.count({ where: { device: conditions } }),
       this.prisma.repairs.count({ where: { device: conditions } })
     ]);
-    return { warranties, repairs }; 
+    return { warranties, repairs, ...result.data.data }; 
   }
 
   async deviceList(user: JwtPayloadDto) {

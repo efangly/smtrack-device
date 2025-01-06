@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request, Query, Req } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateDeviceDto } from './dto/create-device.dto';
@@ -34,9 +34,8 @@ export class DeviceController {
   }
 
   @Get('dashboard/count')
-  @SkipInterceptor()
-  async getDashboard(@Request() req: { user: JwtPayloadDto }) {
-    return this.deviceService.findDashboard(req.user);
+  async getDashboard(@Request() req: { user: JwtPayloadDto }, @Req() request: Request) {
+    return this.deviceService.findDashboard(req.user, request.headers['authorization']);
   }
 
   @Get('dashboard/device')
