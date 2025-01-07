@@ -76,5 +76,5 @@ export class CreateLogdayDto {
 
   @IsDate()
   @IsOptional()
-  updateAt: Date;
+  expire: Date;
 }

@@ -157,6 +157,7 @@ model LogDays {
   extMemory       Boolean  @default(false)
   createAt        DateTime @default(now())
   updateAt        DateTime @default(now()) @updatedAt
+  expire          DateTime @default(now())
   device          Devices  @relation(fields: [serial], references: [id])
 }
 
