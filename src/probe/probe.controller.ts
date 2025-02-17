@@ -14,29 +14,29 @@ export class ProbeController {
 
   @Post()
   @Roles(Role.SUPER, Role.SERVICE)
-  create(@Body() createProbeDto: CreateProbeDto) {
+  async create(@Body() createProbeDto: CreateProbeDto) {
     return this.probeService.create(createProbeDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.probeService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.probeService.findOne(id);
   }
 
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE)
-  update(@Param('id') id: string, @Body() updateProbeDto: UpdateProbeDto) {
+  async update(@Param('id') id: string, @Body() updateProbeDto: UpdateProbeDto) {
     return this.probeService.update(id, updateProbeDto);
   }
 
   @Delete(':id')
   @Roles(Role.SUPER)
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.probeService.remove(id);
   }
 }

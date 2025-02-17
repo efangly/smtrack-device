@@ -8,6 +8,8 @@ import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
+import { ChangeDeviceDto } from './dto/change-device.dto';
+import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 @Injectable()
@@ -49,7 +51,7 @@ export class DeviceService {
       },
       include: { probe: true, config: true }
     });
-    this.rabbitmq.send(
+    await this.rabbitmq.send(
       "add-device", 
       JSON.stringify({ 
         id: result.id, 
@@ -68,7 +70,7 @@ export class DeviceService {
 
   async findAll(wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
     const { conditions, key } = this.findCondition(user);
-    const cache = await this.redis.get(wardId ? wardId : key);
+    const cache = await this.redis.get(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`);
     if (cache) return JSON.parse(cache);
     const [devices, total] = await this.prisma.$transaction([
       this.prisma.devices.findMany({ 
@@ -85,7 +87,7 @@ export class DeviceService {
       }),
       this.prisma.devices.count({ where: wardId ? { ward: wardId ? wardId : undefined } : conditions })
     ]);
-    await this.redis.set(wardId ? wardId : key, JSON.stringify({ total, devices }), 10);
+    await this.redis.set(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`, JSON.stringify({ total, devices }), 10);
     return { total, devices };
   }
 
@@ -113,16 +115,21 @@ export class DeviceService {
   }
 
   async findOne(id: string) {
+    const cache = await this.redis.get(`devices:${id}`);
+    if (cache) return JSON.parse(cache);
     const log = await axios.get(`${process.env.LOG_URL}/logday/${id}`);
     const device = await this.prisma.devices.findUnique({ 
       where: { id }, 
       include: { 
-        probe: true, 
+        probe: {
+          orderBy: { channel: 'asc' },
+        }, 
         config: true,
         warranty: { select: { expire: true } },
         repair: true
       } 
     });
+    await this.redis.set(`devices:${id}`, JSON.stringify({ ...device, log: log.data.data }), 15);
     return { ...device, log: log.data.data };
   }
 
@@ -136,8 +143,99 @@ export class DeviceService {
       }
     }
     deviceDto.updateAt = dateFormat(new Date());
-    await this.redis.del("hospital");
+    await this.redis.del("device");
+    await this.redis.del("listdevice");
     return this.prisma.devices.update({ where: { id }, data: deviceDto });
+  }
+
+  async changeDevice(id: string, device: ChangeDeviceDto) {
+    if (!device.id) throw new BadRequestException('Device id is required');
+    const deviceInfo = await this.prisma.devices.findUnique({ 
+      where: { id },
+      include: { probe: true, config: true } 
+    });
+    await this.prisma.$transaction([
+      this.prisma.devices.update({ 
+        where: { id }, 
+        data: { 
+          ward: 'WID-DEVELOPMENT',
+          hospital: 'HID-DEVELOPMENT',
+          staticName: uuidv4(),
+          name: null,
+          status: false,
+          location: null,
+          position: null,
+          positionPic: null,
+          installDate: null,
+          firmware: null,
+          remark: null,
+          online: false,
+          tag: null
+        } 
+      }),
+      this.prisma.configs.update({
+        where: { sn: id },
+        data: {
+          dhcp: true,
+          ip: null,
+          mac: null,
+          subnet: null,
+          gateway: null,
+          dns: null,
+          dhcpEth: true,
+          ipEth: null,
+          macEth: null,
+          subnetEth: null,
+          gatewayEth: null,
+          dnsEth: null,
+          ssid: 'RDE3_2.4GHz',
+          password: 'rde05012566',
+          simSP: null,
+          email1: null,
+          email2: null,
+          email3: null,
+          hardReset: '0200'
+        }
+      }),
+      this.prisma.probes.updateMany({
+        where: { sn: id },
+        data: {
+          name: null,
+          type: null,
+          tempMin: 0,
+          tempMax: 0,
+          humiMin: 0,
+          humiMax: 0,
+          tempAdj: 0,
+          humiAdj: 0,
+          stampTime: null,
+          doorQty: 1,
+          position: null,
+          muteAlarmDuration: null
+        }
+      }),
+      this.prisma.devices.update({ 
+        where: { id: device.id }, 
+        data: {
+          ward: deviceInfo.ward,
+          hospital: deviceInfo.hospital,
+          staticName: deviceInfo.staticName,
+          name: deviceInfo.name,
+          status: deviceInfo.status,
+          location: deviceInfo.location,
+          position: deviceInfo.position,
+          positionPic: deviceInfo.positionPic,
+          installDate: deviceInfo.installDate,
+          firmware: deviceInfo.firmware,
+          remark: deviceInfo.remark,
+          online: deviceInfo.online,
+          tag: deviceInfo.tag
+        } 
+      })
+    ]);
+    await this.redis.del("device");
+    await this.redis.del("listdevice");
+    return this.prisma.devices.update({ where: { id }, data: device });
   }
 
   async remove(id: string) {
@@ -149,7 +247,7 @@ export class DeviceService {
       const fileName = device.positionPic.split('/')[device.positionPic.split('/').length - 1];
       await axios.delete(`${process.env.UPLOAD_PATH}/media/image/devices/${fileName}`);
     }
-    await this.redis.del("devices");
+    await this.redis.del("device");
     return device;
   }
 
@@ -161,9 +259,9 @@ export class DeviceService {
         conditions = { hospital: user.hosId };
         key = `device:${user.hosId}`;
         break;
-      case "LEGACY_ADMIN":
-        conditions = { hospital: user.hosId };
-        key = `device:${user.hosId}`;
+      case "USER":
+        conditions = { ward: user.wardId };
+        key = `device:${user.wardId}`;
         break;
       case "SERVICE":
         conditions = { NOT: { hospital: "HID-DEVELOPMENT" } };

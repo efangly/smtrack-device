@@ -1,5 +1,4 @@
 import { IsString, IsBoolean, MaxLength, IsOptional, IsDate, IsNumber, IsNotEmpty } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 export class CreateLogdayDto {
   @IsOptional()
@@ -29,7 +28,6 @@ export class CreateLogdayDto {
   humidityDisplay: number;
 
   @IsOptional()
-  @Transform(({ value }) => new Date(value))
   @IsDate()
   sendTime: Date;
 
@@ -73,6 +71,10 @@ export class CreateLogdayDto {
   @IsDate()
   @IsOptional()
   createAt: Date;
+
+  @IsDate()
+  @IsOptional()
+  updateAt: Date;
 
   @IsDate()
   @IsOptional()

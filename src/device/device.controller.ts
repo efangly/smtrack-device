@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request, Query, Req, Patch } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateDeviceDto } from './dto/create-device.dto';
@@ -8,7 +8,7 @@ import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
-import { SkipInterceptor } from '../common/decorators';
+import { ChangeDeviceDto } from './dto/change-device.dto';
 
 @Controller('device')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -48,6 +48,12 @@ export class DeviceController {
   @UseInterceptors(FileInterceptor('image'))
   async update(@Param('id') id: string, @Body() updateDeviceDto: UpdateDeviceDto, @UploadedFile() file: Express.Multer.File) {
     return this.deviceService.update(id, updateDeviceDto, file);
+  }
+
+  @Patch(':id')
+  @Roles(Role.SUPER, Role.SERVICE)
+  async changeDevice(@Param('id') id: string, @Body() changeDeviceDto: ChangeDeviceDto) {
+    return this.deviceService.changeDevice(id, changeDeviceDto);
   }
 
   @Delete(':id')

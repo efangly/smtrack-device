@@ -8,21 +8,30 @@ import { Prisma } from '@prisma/client';
 @Injectable()
 export class ConfigsService {
   constructor(private readonly prisma: PrismaService) {}
-  create(configDto: CreateConfigDto) {
+  async create(configDto: CreateConfigDto) {
     configDto.createAt = dateFormat(new Date());
     configDto.updateAt = dateFormat(new Date());
     return this.prisma.configs.create({ data: configDto as unknown as Prisma.ConfigsCreateInput });
   }
 
-  findAll() {
+  async findAll() {
     return this.prisma.configs.findMany();
   }
 
-  findOne(id: string) {
-    return this.prisma.configs.findUnique({ where: { id: id } });
+  async findOne(id: string) {
+    return this.prisma.devices.findUnique({ 
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        probe: true,
+        config: true
+      } 
+    });
   }
 
-  update(id: string, configDto: UpdateConfigDto) {
+  async update(id: string, configDto: UpdateConfigDto) {
     configDto.updateAt = dateFormat(new Date());
     return this.prisma.configs.update({ 
       where: { id },
@@ -30,7 +39,7 @@ export class ConfigsService {
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.prisma.configs.delete({ where: { id: id } });
   }
 }

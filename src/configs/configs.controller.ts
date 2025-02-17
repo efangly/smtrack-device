@@ -8,34 +8,35 @@ import { Role } from '../common/enums/role.enum';
 import { Roles } from '../common/decorators';
 
 @Controller('configs')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ConfigsController {
   constructor(private readonly configsService: ConfigsService) {}
 
   @Post()
-  create(@Body() createConfigDto: CreateConfigDto) {
+  async create(@Body() createConfigDto: CreateConfigDto) {
     return this.configsService.create(createConfigDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.configsService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.configsService.findOne(id);
   }
 
   @Put(':id')
-  @Roles(Role.SUPER)
-  update(@Param('id') id: string, @Body() updateConfigDto: UpdateConfigDto) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SUPER, Role.SERVICE)
+  async update(@Param('id') id: string, @Body() updateConfigDto: UpdateConfigDto) {
     return this.configsService.update(id, updateConfigDto);
   }
 
   @Delete(':id')
-  @Roles(Role.SUPER)
-  remove(@Param('id') id: string) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.SUPER, Role.SERVICE)
+  async remove(@Param('id') id: string) {
     return this.configsService.remove(id);
   }
 }

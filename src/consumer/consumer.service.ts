@@ -1,14 +1,14 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { connect } from 'amqplib';
-import { PrismaService } from '../prisma/prisma.service';
 import { dateFormat } from '../common/utils';
 import { CreateLogdayDto } from '../logday/dto/create-logday.dto';
 import type { Connection, ConsumeMessage } from 'amqplib';
+import { LogdayService } from '../logday/logday.service';
 
 
 @Injectable()
 export class ConsumerService implements OnModuleInit, OnModuleDestroy {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly log: LogdayService) {}
   private conn: Connection;
 
   async onModuleInit() {
@@ -17,13 +17,15 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
     const channel = await this.conn.createChannel();
     await channel.assertExchange(process.env.NODE_ENV === "production" ? "smtrack" : "smtrack-test", 'direct', { durable: true });
     await channel.assertQueue(queue, { durable: true });
-    await channel.prefetch(10);
+    await channel.prefetch(1);
     channel.consume(queue, async (payload: ConsumeMessage | null) => {
       try {
         const log = JSON.parse(payload.content.toString()) as CreateLogdayDto;
         log.sendTime = dateFormat(log.sendTime);
-        log.expire = new Date(new Date().getTime() + 3600 * 1000);
-        await this.prisma.logDays.create({ data: log });
+        log.expire = dateFormat(new Date(new Date().getTime() + 1800 * 1000));
+        log.createAt = dateFormat(new Date());
+        log.updateAt = dateFormat(new Date());
+        await this.log.create(log);
         channel.ack(payload);
       } catch (err) {
         channel.ack(payload);

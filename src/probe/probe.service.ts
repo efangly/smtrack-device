@@ -7,21 +7,21 @@ import { UpdateProbeDto } from './dto/update-probe.dto';
 @Injectable()
 export class ProbeService {
   constructor(private readonly prisma: PrismaService) {}
-  create(probeDto: CreateProbeDto) {
+  async create(probeDto: CreateProbeDto) {
     probeDto.createAt = dateFormat(new Date());
     probeDto.updateAt = dateFormat(new Date());
     return this.prisma.probes.create({ data: probeDto });
   }
 
-  findAll() {
+  async findAll() {
     return this.prisma.probes.findMany();
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     return this.prisma.probes.findMany({ where: { sn: id } });
   }
 
-  update(id: string, probeDto: UpdateProbeDto) {
+  async update(id: string, probeDto: UpdateProbeDto) {
     probeDto.updateAt = dateFormat(new Date());
     return this.prisma.probes.update({ 
       where: { id },
@@ -29,7 +29,7 @@ export class ProbeService {
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.prisma.probes.delete({ where: { id } });
   }
 }

@@ -10,12 +10,12 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Devices {
-  deviceId    String       @id @default(auto()) @map("_id") @db.ObjectId
+  deviceId    String       @id @default(uuid())
   id          String       @unique @default(uuid())
   ward        String       @default("WID-DEVELOPMENT")
   hospital    String       @default("HID-DEVELOPMENT")
@@ -42,7 +42,7 @@ model Devices {
 }
 
 model Probes {
-  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                    String   @id @default(uuid())
   sn                    String   
   name                  String?  
   type                  String?  
@@ -76,7 +76,7 @@ model Probes {
 }
 
 model Configs {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  id         String   @id @default(uuid())
   sn         String   @unique 
   dhcp       Boolean  @default(true)
   ip         String?  
@@ -84,13 +84,13 @@ model Configs {
   subnet     String?  
   gateway    String?  
   dns        String?  
-  dhcpEth    String?  
+  dhcpEth    Boolean? @default(true) 
   ipEth      String?  
   macEth     String?  
   subnetEth  String?  
   gatewayEth String?  
   dnsEth     String?  
-  ssid       String?  @default("RDE2_2.4GHz")
+  ssid       String?  @default("RDE3_2.4GHz")
   password   String?  @default("rde05012566")
   simSP      String?  
   email1     String?  
@@ -103,7 +103,7 @@ model Configs {
 }
 
 model Repairs {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String   @id @default(uuid())
   seq            Int      @unique // เล่มที่
   devName        String    
   info           String?  
@@ -122,7 +122,7 @@ model Repairs {
 }
 
 model Warranties {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(uuid())
   devName         String   
   product         String?  
   model           String?  
@@ -139,7 +139,7 @@ model Warranties {
 }
 
 model LogDays {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              String   @id @default(uuid())
   serial          String   
   temp            Float    @default(0.00)
   tempDisplay     Float    @default(0.00)
