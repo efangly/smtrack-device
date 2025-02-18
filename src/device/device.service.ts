@@ -106,7 +106,7 @@ export class DeviceService {
     const cache = await this.redis.get(`list${key}`);
     if (cache) return JSON.parse(cache);
     const device = await this.prisma.devices.findMany({ 
-      select: { id: true, name: true, ward: true },
+      select: { id: true, name: true, staticName: true, ward: true },
       where: conditions,
       orderBy: { seq: 'asc' }
     });

@@ -6,7 +6,7 @@ import { UpdateWarrantyDto } from './dto/update-warranty.dto';
 
 @Injectable()
 export class WarrantyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
   create(warrantyDto: CreateWarrantyDto) {
     warrantyDto.createAt = dateFormat(new Date());
     warrantyDto.updateAt = dateFormat(new Date());
@@ -14,7 +14,18 @@ export class WarrantyService {
   }
 
   findAll() {
-    return this.prisma.warranties.findMany();
+    return this.prisma.warranties.findMany({
+      include: {
+        device: {
+          select: {
+            id: true,
+            location: true,
+            position: true,
+          }
+        }
+      },
+      orderBy: { createAt: 'asc' }
+    });
   }
 
   findOne(id: string) {
@@ -23,7 +34,7 @@ export class WarrantyService {
 
   update(id: string, warrantyDto: UpdateWarrantyDto) {
     warrantyDto.updateAt = dateFormat(new Date());
-    return this.prisma.warranties.update({ 
+    return this.prisma.warranties.update({
       where: { id },
       data: warrantyDto
     });

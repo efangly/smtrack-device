@@ -9,7 +9,6 @@ import { DeviceModule } from './device/device.module';
 import { ProbeModule } from './probe/probe.module';
 import { RepairModule } from './repair/repair.module';
 import { HealthModule } from './health/health.module';
-import { LogdayModule } from './logday/logday.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtStrategy, DeviceStrategy } from './common/strategies';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
@@ -29,7 +28,6 @@ import { CronModule } from './cron/cron.module';
     DeviceModule, 
     ConfigsModule, 
     HealthModule, 
-    LogdayModule, 
     RabbitmqModule, 
     ConsumerModule, 
     CronModule

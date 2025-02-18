@@ -1,15 +1,15 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit, Logger } from '@nestjs/common';
 import { connect } from 'amqplib';
 import { dateFormat } from '../common/utils';
-import { CreateLogdayDto } from '../logday/dto/create-logday.dto';
+import { CreateLogdayDto } from './dto/create-logday.dto';
+import { PrismaService } from '../prisma/prisma.service';
 import type { Connection, ConsumeMessage } from 'amqplib';
-import { LogdayService } from '../logday/logday.service';
-
 
 @Injectable()
 export class ConsumerService implements OnModuleInit, OnModuleDestroy {
-  constructor(private readonly log: LogdayService) {}
+  constructor(private readonly prisma: PrismaService) {}
   private conn: Connection;
+  private readonly logger = new Logger(ConsumerService.name);
 
   async onModuleInit() {
     const queue = "send-log";
@@ -25,11 +25,11 @@ export class ConsumerService implements OnModuleInit, OnModuleDestroy {
         log.expire = dateFormat(new Date(new Date().getTime() + 1800 * 1000));
         log.createAt = dateFormat(new Date());
         log.updateAt = dateFormat(new Date());
-        await this.log.create(log);
+        await this.prisma.logDays.create({ data: log });
         channel.ack(payload);
       } catch (err) {
+        this.logger.error(err.message);
         channel.ack(payload);
-        console.log("Error: ", err);
       }
     });
   }

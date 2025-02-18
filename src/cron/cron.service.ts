@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { LogdayService } from 'src/logday/logday.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { format, toDate } from "date-fns";
 
 @Injectable()
 export class CronService {
-  constructor(private readonly log: LogdayService) {}
+  constructor(private readonly prisma: PrismaService) { }
   @Cron('*/10 * * * *')
   async handleCron() {
-    return this.log.checkExpire();
+    await this.prisma.logDays.deleteMany({
+      where: {
+        expire: {
+          lt: toDate(format(new Date(), "yyyy-MM-dd'T'HH:mm:ss'Z'"))
+        }
+      }
+    });
   }
 }

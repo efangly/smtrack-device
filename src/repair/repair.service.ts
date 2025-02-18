@@ -14,7 +14,17 @@ export class RepairService {
   }
 
   findAll() {
-    return this.prisma.repairs.findMany();
+    return this.prisma.repairs.findMany({
+      include: {
+        device: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      },
+      orderBy: { createAt: 'desc' }
+    });
   }
 
   findOne(id: string) {
