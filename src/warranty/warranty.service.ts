@@ -19,6 +19,7 @@ export class WarrantyService {
         device: {
           select: {
             id: true,
+            name: true,
             location: true,
             position: true,
           }
