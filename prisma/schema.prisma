@@ -104,7 +104,7 @@ model Configs {
 
 model Repairs {
   id             String   @id @default(uuid())
-  seq            Int      @unique // เล่มที่
+  seq            Int      @unique @default(autoincrement()) // เล่มที่
   devName        String    
   info           String?  
   info1          String?  

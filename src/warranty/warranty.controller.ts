@@ -14,29 +14,29 @@ export class WarrantyController {
 
   @Post()
   @Roles(Role.SUPER, Role.SERVICE)
-  create(@Body() createWarrantyDto: CreateWarrantyDto) {
+  async create(@Body() createWarrantyDto: CreateWarrantyDto) {
     return this.warrantyService.create(createWarrantyDto);
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.warrantyService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.warrantyService.findOne(id);
   }
 
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE)
-  update(@Param('id') id: string, @Body() updateWarrantyDto: UpdateWarrantyDto) {
+  async update(@Param('id') id: string, @Body() updateWarrantyDto: UpdateWarrantyDto) {
     return this.warrantyService.update(id, updateWarrantyDto);
   }
 
   @Delete(':id')
   @Roles(Role.SUPER)
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.warrantyService.remove(id);
   }
 }

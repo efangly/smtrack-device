@@ -7,19 +7,21 @@ import { UpdateRepairDto } from './dto/update-repair.dto';
 @Injectable()
 export class RepairService {
   constructor(private readonly prisma: PrismaService) {}
-  create(repairDto: CreateRepairDto) {
+  async create(repairDto: CreateRepairDto) {
+    const seq = await this.prisma.repairs.findMany({ take: 1, orderBy: { createAt: 'desc' } });
+    repairDto.seq = seq.length === 0 ? 1 : seq[0].seq + 1;
     repairDto.createAt = dateFormat(new Date());
     repairDto.updateAt = dateFormat(new Date());
     return this.prisma.repairs.create({ data: repairDto });
   }
 
-  findAll() {
+  async findAll() {
     return this.prisma.repairs.findMany({
       include: {
         device: {
           select: {
             id: true,
-            name: true,
+            name: true
           }
         }
       },
@@ -27,11 +29,11 @@ export class RepairService {
     });
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     return this.prisma.repairs.findUnique({ where: { id: id } });
   }
 
-  update(id: string, repairDto: UpdateRepairDto) {
+  async update(id: string, repairDto: UpdateRepairDto) {
     repairDto.updateAt = dateFormat(new Date());
     return this.prisma.repairs.update({ 
       where: { id },
@@ -39,7 +41,7 @@ export class RepairService {
     });
   }
 
-  remove(id: string) {
+  async remove(id: string) {
     return this.prisma.repairs.delete({ where: { id: id } });
   }
 }
