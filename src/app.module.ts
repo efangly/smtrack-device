@@ -11,7 +11,6 @@ import { RepairModule } from './repair/repair.module';
 import { HealthModule } from './health/health.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JwtStrategy, DeviceStrategy } from './common/strategies';
-import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 import { ConsumerModule } from './consumer/consumer.module';
 import { CronModule } from './cron/cron.module';
 
@@ -28,7 +27,6 @@ import { CronModule } from './cron/cron.module';
     DeviceModule, 
     ConfigsModule, 
     HealthModule, 
-    RabbitmqModule, 
     ConsumerModule, 
     CronModule
   ],

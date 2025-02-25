@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Inject } from '@nestjs/common';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,7 +7,7 @@ import { uploadFile, dateFormat } from '../common/utils';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
+import { ClientProxy } from '@nestjs/microservices';
 import { ChangeDeviceDto } from './dto/change-device.dto';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -15,10 +15,10 @@ import axios from 'axios';
 @Injectable()
 export class DeviceService {
   constructor(
+    @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
     private readonly prisma: PrismaService, 
     private readonly redis: RedisService,
-    private readonly jwt: JwtService,
-    private readonly rabbitmq: RabbitmqService
+    private readonly jwt: JwtService
   ) {}
   async create(deviceDto: CreateDeviceDto, file: Express.Multer.File) {
     if (file) deviceDto.positionPic = await uploadFile(file, 'devices');
@@ -29,8 +29,6 @@ export class DeviceService {
     deviceDto.createAt = dateFormat(new Date());
     deviceDto.updateAt = dateFormat(new Date());
     deviceDto.token = this.jwt.sign({ sn: deviceDto.id}, { secret: process.env.DEVICE_SECRET });
-    await this.redis.del("device");
-    await this.redis.del("listdevice");
     const result = await this.prisma.devices.create({ 
       data: {
         ...deviceDto,
@@ -51,20 +49,19 @@ export class DeviceService {
       },
       include: { probe: true, config: true }
     });
-    await this.rabbitmq.send(
-      "add-device", 
-      JSON.stringify({ 
-        id: result.id, 
-        hospital: result.hospital, 
-        ward: result.ward,
-        staticName: result.staticName,
-        name: result.name,
-        status: result.status,
-        seq: result.seq,
-        firmware: result.firmware,
-        remark: result.remark
-      })
-    );
+    this.client.emit('add-device', { 
+      id: result.id, 
+      hospital: result.hospital, 
+      ward: result.ward,
+      staticName: result.staticName,
+      name: result.name,
+      status: result.status,
+      seq: result.seq,
+      firmware: result.firmware,
+      remark: result.remark
+    });
+    await this.redis.del("device");
+    await this.redis.del("listdevice");
     return result;
   }
 
@@ -143,9 +140,19 @@ export class DeviceService {
       }
     }
     deviceDto.updateAt = dateFormat(new Date());
+    const result = await this.prisma.devices.update({ where: { id }, data: deviceDto });
+    this.client.emit('update-device', { 
+      hospital: result.hospital, 
+      ward: result.ward,
+      staticName: result.staticName,
+      name: result.name,
+      status: result.status,
+      firmware: result.firmware,
+      remark: result.remark
+    });
     await this.redis.del("device");
     await this.redis.del("listdevice");
-    return this.prisma.devices.update({ where: { id }, data: deviceDto });
+    return result;
   }
 
   async changeDevice(id: string, device: ChangeDeviceDto) {
@@ -235,7 +242,7 @@ export class DeviceService {
     ]);
     await this.redis.del("device");
     await this.redis.del("listdevice");
-    return this.prisma.devices.update({ where: { id }, data: device });
+    return 'Change device successfully';
   }
 
   async remove(id: string) {
