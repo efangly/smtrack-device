@@ -8,7 +8,7 @@ export class ConsumerController {
   constructor(private readonly consumerService: ConsumerService) {}
   private readonly logger = new Logger(ConsumerController.name);
 
-  @EventPattern('add-log')
+  @EventPattern('log-device')
   async backup(@Payload() data: CreateLogdayDto, @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
     const message = context.getMessage();
