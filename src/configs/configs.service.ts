@@ -9,11 +9,10 @@ import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ConfigsService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) {}
+  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
   async create(configDto: CreateConfigDto) {
     configDto.createAt = dateFormat(new Date());
     configDto.updateAt = dateFormat(new Date());
-    await this.redis.del("device");
     return this.prisma.configs.create({ data: configDto as unknown as Prisma.ConfigsCreateInput });
   }
 
@@ -22,7 +21,9 @@ export class ConfigsService {
   }
 
   async findOne(id: string) {
-    return this.prisma.devices.findUnique({ 
+    const cache = await this.redis.get(`config:${id}`);
+    if (cache) return JSON.parse(cache);
+    const result = await this.prisma.devices.findUnique({
       where: { id },
       select: {
         id: true,
@@ -30,17 +31,20 @@ export class ConfigsService {
         status: true,
         probe: true,
         config: true
-      } 
+      }
     });
+    await this.redis.set(`config:${id}`, JSON.stringify(result), 3600 * 24);
+    return result;
   }
 
   async update(id: string, configDto: UpdateConfigDto) {
     configDto.updateAt = dateFormat(new Date());
-    const result = await this.prisma.configs.update({ 
+    const result = await this.prisma.configs.update({
       where: { sn: id },
       data: configDto as unknown as Prisma.ConfigsUpdateInput
     });
     await this.redis.del("device");
+    await this.redis.del(`config:${id}`);
     return result;
   }
 
