@@ -34,7 +34,7 @@ export class ConfigsService {
   async update(id: string, configDto: UpdateConfigDto) {
     configDto.updateAt = dateFormat(new Date());
     return this.prisma.configs.update({ 
-      where: { id },
+      where: { sn: id },
       data: configDto as unknown as Prisma.ConfigsUpdateInput
     });
   }

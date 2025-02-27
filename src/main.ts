@@ -22,7 +22,7 @@ async function bootstrap() {
       queueOptions: { durable: true },
       noAck: false,
       prefetchCount: 1
-    },
+    }
   });
   await microservice.listen();
   await app.listen(process.env.PORT ?? 8080);
