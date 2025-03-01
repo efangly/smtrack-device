@@ -16,10 +16,10 @@ import axios from 'axios';
 export class DeviceService {
   constructor(
     @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
-    private readonly prisma: PrismaService, 
+    private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly jwt: JwtService
-  ) {}
+  ) { }
   async create(deviceDto: CreateDeviceDto, file: Express.Multer.File) {
     if (file) deviceDto.positionPic = await uploadFile(file, 'devices');
     const device = await this.prisma.devices.findUnique({ where: { id: deviceDto.id } });
@@ -28,8 +28,8 @@ export class DeviceService {
     deviceDto.seq = seq.length === 0 ? 1 : seq[0].seq + 1;
     deviceDto.createAt = dateFormat(new Date());
     deviceDto.updateAt = dateFormat(new Date());
-    deviceDto.token = this.jwt.sign({ sn: deviceDto.id}, { secret: process.env.DEVICE_SECRET });
-    const result = await this.prisma.devices.create({ 
+    deviceDto.token = this.jwt.sign({ sn: deviceDto.id }, { secret: process.env.DEVICE_SECRET });
+    const result = await this.prisma.devices.create({
       data: {
         ...deviceDto,
         probe: {
@@ -49,9 +49,9 @@ export class DeviceService {
       },
       include: { probe: true, config: true }
     });
-    this.client.emit('add-device', { 
-      id: result.id, 
-      hospital: result.hospital, 
+    this.client.emit('add-device', {
+      id: result.id,
+      hospital: result.hospital,
       ward: result.ward,
       staticName: result.staticName,
       name: result.name,
@@ -70,12 +70,12 @@ export class DeviceService {
     const cache = await this.redis.get(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`);
     if (cache) return JSON.parse(cache);
     const [devices, total] = await this.prisma.$transaction([
-      this.prisma.devices.findMany({ 
+      this.prisma.devices.findMany({
         skip: page ? (parseInt(page) - 1) * parseInt(perpage) : 0,
         take: perpage ? parseInt(perpage) : 10,
         where: wardId ? { ward: wardId ? wardId : undefined } : conditions,
-        include: { 
-          probe: true, 
+        include: {
+          probe: true,
           config: true,
           warranty: { select: { expire: true } },
           log: { take: 1, orderBy: { createAt: 'desc' } }
@@ -95,36 +95,36 @@ export class DeviceService {
       this.prisma.warranties.count({ where: { device: conditions } }),
       this.prisma.repairs.count({ where: { device: conditions } })
     ]);
-    return { warranties, repairs, ...result.data.data }; 
+    return { warranties, repairs, ...result.data.data };
   }
 
   async deviceList(user: JwtPayloadDto) {
     const { conditions, key } = this.findCondition(user);
     const cache = await this.redis.get(`list${key}`);
     if (cache) return JSON.parse(cache);
-    const device = await this.prisma.devices.findMany({ 
+    const device = await this.prisma.devices.findMany({
       select: { id: true, name: true, staticName: true, ward: true },
       where: conditions,
       orderBy: { seq: 'asc' }
     });
     await this.redis.set(`list${key}`, JSON.stringify(device), 3600 * 6);
-    return device; 
+    return device;
   }
 
   async findOne(id: string) {
     const cache = await this.redis.get(`devices:${id}`);
     if (cache) return JSON.parse(cache);
     const log = await axios.get(`${process.env.LOG_URL}/logday/${id}`);
-    const device = await this.prisma.devices.findUnique({ 
-      where: { id }, 
-      include: { 
+    const device = await this.prisma.devices.findUnique({
+      where: { id },
+      include: {
         probe: {
           orderBy: { channel: 'asc' },
-        }, 
+        },
         config: true,
         warranty: { select: { expire: true } },
         repair: true
-      } 
+      }
     });
     await this.redis.set(`devices:${id}`, JSON.stringify({ ...device, log: log.data.data }), 15);
     return { ...device, log: log.data.data };
@@ -141,8 +141,8 @@ export class DeviceService {
     }
     deviceDto.updateAt = dateFormat(new Date());
     const result = await this.prisma.devices.update({ where: { id }, data: deviceDto });
-    this.client.emit('update-device', { 
-      hospital: result.hospital, 
+    this.client.emit('update-device', {
+      hospital: result.hospital,
       ward: result.ward,
       staticName: result.staticName,
       name: result.name,
@@ -157,14 +157,14 @@ export class DeviceService {
 
   async changeDevice(id: string, device: ChangeDeviceDto) {
     if (!device.id) throw new BadRequestException('Device id is required');
-    const deviceInfo = await this.prisma.devices.findUnique({ 
+    const deviceInfo = await this.prisma.devices.findUnique({
       where: { id },
-      include: { probe: true, config: true } 
+      include: { probe: true, config: true }
     });
     await this.prisma.$transaction([
-      this.prisma.devices.update({ 
-        where: { id }, 
-        data: { 
+      this.prisma.devices.update({
+        where: { id },
+        data: {
           ward: 'WID-DEVELOPMENT',
           hospital: 'HID-DEVELOPMENT',
           staticName: uuidv4(),
@@ -178,7 +178,7 @@ export class DeviceService {
           remark: null,
           online: false,
           tag: null
-        } 
+        }
       }),
       this.prisma.configs.update({
         where: { sn: id },
@@ -221,8 +221,8 @@ export class DeviceService {
           muteAlarmDuration: null
         }
       }),
-      this.prisma.devices.update({ 
-        where: { id: device.id }, 
+      this.prisma.devices.update({
+        where: { id: device.id },
         data: {
           ward: deviceInfo.ward,
           hospital: deviceInfo.hospital,
@@ -237,7 +237,7 @@ export class DeviceService {
           remark: deviceInfo.remark,
           online: deviceInfo.online,
           tag: deviceInfo.tag
-        } 
+        }
       })
     ]);
     await this.redis.del("device");
@@ -246,7 +246,7 @@ export class DeviceService {
   }
 
   async remove(id: string) {
-    const device = await this.prisma.devices.delete({ 
+    const device = await this.prisma.devices.delete({
       where: { id },
       include: { probe: true, config: true }
     });
@@ -258,12 +258,22 @@ export class DeviceService {
     return device;
   }
 
-  private findCondition (user: JwtPayloadDto): { conditions: Prisma.DevicesWhereInput | undefined, key: string } {
+  private findCondition(user: JwtPayloadDto): { conditions: Prisma.DevicesWhereInput | undefined, key: string } {
     let conditions: Prisma.DevicesWhereInput | undefined = undefined;
     let key = "";
     switch (user.role) {
       case "ADMIN":
-        conditions = { hospital: user.hosId };
+        conditions = {
+          AND: [
+            { hospital: user.hosId },
+            {
+              NOT: [
+                { hospital: "HID-DEVELOPMENT" },
+                { ward: "WID-DEVELOPMENT" }
+              ]
+            }
+          ]
+        };
         key = `device:${user.hosId}`;
         break;
       case "USER":
@@ -271,7 +281,12 @@ export class DeviceService {
         key = `device:${user.wardId}`;
         break;
       case "SERVICE":
-        conditions = { NOT: { hospital: "HID-DEVELOPMENT" } };
+        conditions = {
+          NOT: [
+            { hospital: "HID-DEVELOPMENT" },
+            { ward: "WID-DEVELOPMENT" }
+          ]
+        };
         key = "device:HID-DEVELOPMENT";
         break;
       default:

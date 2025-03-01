@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { RepairService } from './repair.service';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { CreateRepairDto } from './dto/create-repair.dto';
 import { UpdateRepairDto } from './dto/update-repair.dto';
+import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 
@@ -20,8 +21,8 @@ export class RepairController {
 
   @Get()
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
-  async findAll() {
-    return this.repairService.findAll();
+  async findAll(@Request() req: { user: JwtPayloadDto }) {
+    return this.repairService.findAll(req.user);
   }
 
   @Get(':id')

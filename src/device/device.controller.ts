@@ -24,7 +24,7 @@ export class DeviceController {
 
   @Get()
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.USER)
-  async findAll(@Query('ward') ward: string, @Query('page') page: string, @Query('perpage') perpage: string,@Request() req: { user: JwtPayloadDto }) {
+  async findAll(@Query('ward') ward: string, @Query('page') page: string, @Query('perpage') perpage: string, @Request() req: { user: JwtPayloadDto }) {
     return this.deviceService.findAll(ward, page, perpage, req.user);
   }
 
