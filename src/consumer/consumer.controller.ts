@@ -28,7 +28,6 @@ export class ConsumerController {
     const message = context.getMessage();
     try {
       await this.consumerService.online(data);
-      this.logger.log(`Device ${data.sn} is ${data.status ? 'online' : 'offline'}`);
       channel.ack(message);
     } catch (error) {
       this.logger.error(error);

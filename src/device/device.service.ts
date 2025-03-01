@@ -142,6 +142,7 @@ export class DeviceService {
     deviceDto.updateAt = dateFormat(new Date());
     const result = await this.prisma.devices.update({ where: { id }, data: deviceDto });
     this.client.emit('update-device', {
+      serial: result.id,
       hospital: result.hospital,
       ward: result.ward,
       staticName: result.staticName,
