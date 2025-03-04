@@ -16,6 +16,15 @@ import { JwtModule } from '@nestjs/jwt';
           queue: 'device_queue',
           queueOptions: { durable: true }
         }
+      },
+      {
+        name: 'ONLINE_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: [process.env.RABBITMQ],
+          queue: 'online_queue',
+          queueOptions: { durable: true }
+        }
       }
     ])
   ],
