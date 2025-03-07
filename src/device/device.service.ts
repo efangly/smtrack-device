@@ -62,6 +62,7 @@ export class DeviceService {
     });
     await this.redis.del("device");
     await this.redis.del("listdevice");
+    await this.redis.del("deviceinfo");
     return result;
   }
 
@@ -108,6 +109,17 @@ export class DeviceService {
       orderBy: { seq: 'asc' }
     });
     await this.redis.set(`list${key}`, JSON.stringify(device), 3600 * 6);
+    return device;
+  }
+
+  async deviceInfo() {
+    const cache = await this.redis.get('deviceinfo');
+    if (cache) return JSON.parse(cache);
+    const device = await this.prisma.devices.findMany({
+      select: { id: true, name: true, staticName: true, ward: true },
+      orderBy: { seq: 'asc' }
+    });
+    await this.redis.set('deviceinfo', JSON.stringify(device), 3600 * 6);
     return device;
   }
 
@@ -256,6 +268,7 @@ export class DeviceService {
       await axios.delete(`${process.env.UPLOAD_PATH}/media/image/devices/${fileName}`);
     }
     await this.redis.del("device");
+    await this.redis.del("deviceinfo");
     return device;
   }
 

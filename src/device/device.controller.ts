@@ -11,10 +11,10 @@ import { Role } from '../common/enums/role.enum';
 import { ChangeDeviceDto } from './dto/change-device.dto';
 
 @Controller('device')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   @Roles(Role.SUPER)
   @UseInterceptors(FileInterceptor('image'))
@@ -22,27 +22,37 @@ export class DeviceController {
     return this.deviceService.create(createDeviceDto, file);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.USER)
   async findAll(@Query('ward') ward: string, @Query('page') page: string, @Query('perpage') perpage: string, @Request() req: { user: JwtPayloadDto }) {
     return this.deviceService.findAll(ward, page, perpage, req.user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.deviceService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('dashboard/count')
   async getDashboard(@Request() req: { user: JwtPayloadDto }, @Req() request: Request) {
     return this.deviceService.findDashboard(req.user, request.headers['authorization']);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('dashboard/device')
   async getDeviceList(@Request() req: { user: JwtPayloadDto }) {
     return this.deviceService.deviceList(req.user);
   }
 
+  @Get('info/device')
+  async getDeviceInfo() {
+    return this.deviceService.deviceInfo();
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   @UseInterceptors(FileInterceptor('image'))
@@ -50,12 +60,14 @@ export class DeviceController {
     return this.deviceService.update(id, updateDeviceDto, file);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
   @Roles(Role.SUPER, Role.SERVICE)
   async changeDevice(@Param('id') id: string, @Body() changeDeviceDto: ChangeDeviceDto) {
     return this.deviceService.changeDevice(id, changeDeviceDto);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   @Roles(Role.SUPER)
   async remove(@Param('id') id: string) {
