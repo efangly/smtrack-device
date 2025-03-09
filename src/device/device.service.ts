@@ -50,7 +50,7 @@ export class DeviceService {
       include: { probe: true, config: true }
     });
     this.client.emit('add-device', {
-      id: result.id,
+      serial: result.id,
       hospital: result.hospital,
       ward: result.ward,
       staticName: result.staticName,
