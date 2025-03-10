@@ -5,6 +5,7 @@ import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
 import { RedisService } from '../redis/redis.service';
 import { Prisma } from '@prisma/client';
+import { UpdateDeviceDto } from '../device/dto/update-device.dto';
 
 
 @Injectable()
@@ -45,6 +46,17 @@ export class ConfigsService {
     });
     await this.redis.del("device");
     await this.redis.del(`config:${id}`);
+    return result;
+  }
+
+  async updateVersion(id: string, configDto: UpdateDeviceDto) {
+    configDto.updateAt = dateFormat(new Date());
+    const result = await this.prisma.devices.update({
+      where: { id },
+      data: configDto
+    });
+    await this.redis.del("device");
+    await this.redis.del("listdevice");
     return result;
   }
 

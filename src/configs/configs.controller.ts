@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { ConfigsService } from './configs.service';
@@ -6,6 +6,7 @@ import { CreateConfigDto } from './dto/create-config.dto';
 import { UpdateConfigDto } from './dto/update-config.dto';
 import { Role } from '../common/enums/role.enum';
 import { Roles } from '../common/decorators';
+import { UpdateDeviceDto } from 'src/device/dto/update-device.dto';
 
 @Controller('configs')
 export class ConfigsController {
@@ -31,6 +32,11 @@ export class ConfigsController {
   @Roles(Role.SUPER, Role.SERVICE)
   async update(@Param('id') id: string, @Body() updateConfigDto: UpdateConfigDto) {
     return this.configsService.update(id, updateConfigDto);
+  }
+
+  @Patch(':id')
+  async updateFirmware(@Param('id') id: string, @Body() updateConfig: UpdateDeviceDto) {
+    return this.configsService.update(id, updateConfig);
   }
 
   @Delete(':id')
