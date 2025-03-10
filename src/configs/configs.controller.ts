@@ -36,7 +36,7 @@ export class ConfigsController {
 
   @Patch(':id')
   async updateFirmware(@Param('id') id: string, @Body() updateConfig: UpdateDeviceDto) {
-    return this.configsService.update(id, updateConfig);
+    return this.configsService.updateVersion(id, updateConfig);
   }
 
   @Delete(':id')
