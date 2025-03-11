@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -15,51 +15,53 @@ datasource db {
 }
 
 model Devices {
-  deviceId    String       @id @default(uuid())
-  id          String       @unique @default(uuid())
-  ward        String       @default("WID-DEVELOPMENT")
-  hospital    String       @default("HID-DEVELOPMENT")
-  staticName  String       @unique @default(uuid())
-  name        String?      
-  status      Boolean      @default(false)
-  seq         Int          @unique
-  location    String?      
-  position    String?      
-  positionPic String?      
-  installDate DateTime?    @default(now())
-  firmware    String       @default("1.0.0")
-  remark      String?      
-  online      Boolean      @default(false)
-  tag         String?      
-  token       String?      
-  createAt    DateTime     @default(now())
-  updateAt    DateTime     @default(now()) @updatedAt
-  config      Configs?
-  repair      Repairs[]
-  warranty    Warranties[]
-  probe       Probes[]
-  log         LogDays[]
+  deviceId     String       @id @default(uuid())
+  id           String       @unique @default(uuid())
+  ward         String       @default("WID-DEVELOPMENT")
+  wardName     String?      @default("WARD-DEV")
+  hospital     String       @default("HID-DEVELOPMENT")
+  hospitalName String?      @default("HOSPITAL-DEV")
+  staticName   String       @unique @default(uuid())
+  name         String?
+  status       Boolean      @default(false)
+  seq          Int          @unique
+  location     String?
+  position     String?
+  positionPic  String?
+  installDate  DateTime?    @default(now())
+  firmware     String       @default("1.0.0")
+  remark       String?
+  online       Boolean      @default(false)
+  tag          String?
+  token        String?
+  createAt     DateTime     @default(now())
+  updateAt     DateTime     @default(now()) @updatedAt
+  config       Configs?
+  repair       Repairs[]
+  warranty     Warranties[]
+  probe        Probes[]
+  log          LogDays[]
 }
 
 model Probes {
   id                    String   @id @default(uuid())
-  sn                    String   
-  name                  String?  
-  type                  String?  
-  channel               String   @default("1") 
+  sn                    String
+  name                  String?
+  type                  String?
+  channel               String   @default("1")
   tempMin               Float    @default(0.00)
   tempMax               Float    @default(0.00)
   humiMin               Float    @default(0.00)
   humiMax               Float    @default(0.00)
   tempAdj               Float    @default(0.00)
   humiAdj               Float    @default(0.00)
-  stampTime             String?  
-  doorQty               Int      @default(1) 
-  position              String?  
-  muteAlarmDuration     String?  
+  stampTime             String?
+  doorQty               Int      @default(1)
+  position              String?
+  muteAlarmDuration     String?
   doorSound             Boolean  @default(true)
-  doorAlarmTime         String?  
-  muteDoorAlarmDuration String?  
+  doorAlarmTime         String?
+  muteDoorAlarmDuration String?
   notiDelay             Int      @default(0) //ดีเลการส่งแจ้งเตือน 0 คือส่งทันที
   notiToNormal          Boolean  @default(true) //ส่งแจ้งเตือนหลังอุณหภูมิกลับมาปกติ
   notiMobile            Boolean  @default(true) //เปิดปิดการแจ้งเตือนไปยังมือถือ
@@ -67,9 +69,9 @@ model Probes {
   firstDay              Day      @default(OFF)
   secondDay             Day      @default(OFF)
   thirdDay              Day      @default(OFF)
-  firstTime             String?  @default("0000") 
-  secondTime            String?  @default("0000") 
-  thirdTime             String?  @default("0000") 
+  firstTime             String?  @default("0000")
+  secondTime            String?  @default("0000")
+  thirdTime             String?  @default("0000")
   createAt              DateTime @default(now())
   updateAt              DateTime @default(now()) @updatedAt
   device                Devices  @relation(fields: [sn], references: [id], onDelete: Cascade)
@@ -77,25 +79,25 @@ model Probes {
 
 model Configs {
   id         String   @id @default(uuid())
-  sn         String   @unique 
+  sn         String   @unique
   dhcp       Boolean  @default(true)
-  ip         String?  
-  mac        String?  
-  subnet     String?  
-  gateway    String?  
-  dns        String?  
-  dhcpEth    Boolean? @default(true) 
-  ipEth      String?  
-  macEth     String?  
-  subnetEth  String?  
-  gatewayEth String?  
-  dnsEth     String?  
+  ip         String?
+  mac        String?
+  subnet     String?
+  gateway    String?
+  dns        String?
+  dhcpEth    Boolean? @default(true)
+  ipEth      String?
+  macEth     String?
+  subnetEth  String?
+  gatewayEth String?
+  dnsEth     String?
   ssid       String?  @default("RDE3_2.4GHz")
   password   String?  @default("rde05012566")
-  simSP      String?  
-  email1     String?  
-  email2     String?  
-  email3     String?  
+  simSP      String?
+  email1     String?
+  email2     String?
+  email3     String?
   hardReset  String?  @default("0200") //ตั้งค่าเวลาที่ต้องการให้เครื่อง reset ตัวเอง
   createAt   DateTime @default(now())
   updateAt   DateTime @default(now()) @updatedAt
@@ -105,17 +107,17 @@ model Configs {
 model Repairs {
   id             String   @id @default(uuid())
   seq            Int      @unique @default(autoincrement()) // เล่มที่
-  devName        String    
-  info           String?  
-  info1          String?  
-  info2          String?  
+  devName        String
+  info           String?
+  info1          String?
+  info2          String?
   address        String? // โรงพยาบาลที่แจ้ง
   ward           String? // หอผู้ป่วย
-  detail         String? 
-  phone          String? 
-  status         String? 
-  warrantyStatus String? 
-  remark         String? 
+  detail         String?
+  phone          String?
+  status         String?
+  warrantyStatus String?
+  remark         String?
   createAt       DateTime @default(now())
   updateAt       DateTime @default(now()) @updatedAt
   device         Devices  @relation(fields: [devName], references: [staticName], onDelete: Cascade)
@@ -123,14 +125,14 @@ model Repairs {
 
 model Warranties {
   id              String   @id @default(uuid())
-  devName         String   
-  product         String?  
-  model           String?  
-  installDate     String?  
-  customerName    String?  
-  customerAddress String?  
-  saleDepartment  String?  
-  invoice         String?  
+  devName         String
+  product         String?
+  model           String?
+  installDate     String?
+  customerName    String?
+  customerAddress String?
+  saleDepartment  String?
+  invoice         String?
   expire          DateTime @default(now())
   status          Boolean  @default(true)
   createAt        DateTime @default(now())
@@ -140,7 +142,7 @@ model Warranties {
 
 model LogDays {
   id              String   @id @default(uuid())
-  serial          String   
+  serial          String
   temp            Float    @default(0.00)
   tempDisplay     Float    @default(0.00)
   humidity        Float    @default(0.00)
@@ -152,7 +154,7 @@ model LogDays {
   door3           Boolean  @default(false)
   internet        Boolean  @default(false)
   probe           String   @default("1")
-  battery         Int      @default(0) 
+  battery         Int      @default(0)
   tempInternal    Float?   @default(0.00)
   extMemory       Boolean  @default(false)
   createAt        DateTime @default(now())
