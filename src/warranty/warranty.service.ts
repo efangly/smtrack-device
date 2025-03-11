@@ -5,12 +5,14 @@ import { CreateWarrantyDto } from './dto/create-warranty.dto';
 import { UpdateWarrantyDto } from './dto/update-warranty.dto';
 import { JwtPayloadDto } from '../common/dto';
 import { Prisma } from '@prisma/client';
+import { format } from "date-fns"
 import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class WarrantyService {
   constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
   async create(warrantyDto: CreateWarrantyDto) {
+    warrantyDto.id = `WID-${format(new Date(), "yyyyMMddHHmmssSSS")}`;
     warrantyDto.createAt = dateFormat(new Date());
     warrantyDto.updateAt = dateFormat(new Date());
     const result = await this.prisma.warranties.create({ data: warrantyDto });

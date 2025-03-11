@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { format } from "date-fns"
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { dateFormat } from '../common/utils';
 import { CreateRepairDto } from './dto/create-repair.dto';
 import { UpdateRepairDto } from './dto/update-repair.dto';
 import { JwtPayloadDto } from '../common/dto/payload.dto';
-import { Prisma } from '@prisma/client';
 import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class RepairService {
   constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
   async create(repairDto: CreateRepairDto) {
+    repairDto.id = `RID-${format(new Date(), "yyyyMMddHHmmssSSS")}`;
     const seq = await this.prisma.repairs.findMany({ take: 1, orderBy: { createAt: 'desc' } });
     repairDto.seq = seq.length === 0 ? 1 : seq[0].seq + 1;
     repairDto.createAt = dateFormat(new Date());
