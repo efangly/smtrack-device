@@ -24,7 +24,7 @@ export class DeviceService {
     if (file) deviceDto.positionPic = await uploadFile(file, 'devices');
     const device = await this.prisma.devices.findUnique({ where: { id: deviceDto.id } });
     if (device) throw new BadRequestException('Device already exists');
-    const seq = await this.prisma.devices.findMany({ take: 1, orderBy: { createAt: 'desc' } });
+    const seq = await this.prisma.devices.findMany({ take: 1, orderBy: { seq: 'desc' } });
     deviceDto.seq = seq.length === 0 ? 1 : seq[0].seq + 1;
     deviceDto.createAt = dateFormat(new Date());
     deviceDto.updateAt = dateFormat(new Date());
