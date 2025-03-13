@@ -38,7 +38,7 @@ export class WarrantyService {
       },
       orderBy: { createAt: 'asc' }
     });
-    await this.redis.set(key, JSON.stringify(result), 3600 * 6);
+    if (result.length > 0) await this.redis.set(key, JSON.stringify(result), 3600 * 6);
     return result;
   }
 

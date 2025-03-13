@@ -85,7 +85,7 @@ export class DeviceService {
       }),
       this.prisma.devices.count({ where: wardId ? { ward: wardId ? wardId : undefined } : conditions })
     ]);
-    await this.redis.set(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`, JSON.stringify({ total, devices }), 10);
+    if (devices.length > 0) await this.redis.set(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`, JSON.stringify({ total, devices }), 10);
     return { total, devices };
   }
 
@@ -119,7 +119,7 @@ export class DeviceService {
       select: { id: true, name: true, staticName: true, ward: true },
       orderBy: { seq: 'asc' }
     });
-    await this.redis.set('deviceinfo', JSON.stringify(device), 3600 * 6);
+    if (device.length > 0) await this.redis.set('deviceinfo', JSON.stringify(device), 3600 * 6);
     return device;
   }
 

@@ -34,7 +34,7 @@ export class ConfigsService {
         config: true
       }
     });
-    await this.redis.set(`config:${id}`, JSON.stringify(result), 3600 * 24);
+    if (result) await this.redis.set(`config:${id}`, JSON.stringify(result), 3600 * 24);
     return result;
   }
 
