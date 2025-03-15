@@ -1,20 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { dateFormat } from '../common/utils';
 import { CreateProbeDto } from './dto/create-probe.dto';
 import { UpdateProbeDto } from './dto/update-probe.dto';
 import { RedisService } from '../redis/redis.service';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
+import { JwtPayloadDto } from '../common/dto';
 
 @Injectable()
 export class ProbeService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) {}
-  async create(probeDto: CreateProbeDto) {
+  constructor(
+    private readonly prisma: PrismaService, 
+    private readonly redis: RedisService, 
+    private readonly rabbitmq: RabbitmqService
+  ) {}
+  async create(probeDto: CreateProbeDto, user: JwtPayloadDto) {
     probeDto.createAt = dateFormat(new Date());
     probeDto.updateAt = dateFormat(new Date());
-    await this.prisma.probes.create({ data: probeDto });
+    const probe = await this.prisma.probes.create({ data: probeDto });
+    this.rabbitmq.sendHistory('probe', 'create', user.id, `Create probe: ${probe.id} with ${probeDto.sn} by ${user.name}`);
     await this.redis.del("device");
     await this.redis.del("listdevice");
-    return 'This action adds a new probe';
+    return probe;
   }
 
   async findAll() {
@@ -30,18 +37,25 @@ export class ProbeService {
     return this.prisma.probes.findMany({ where: { sn: id } });
   }
 
-  async update(id: string, probeDto: UpdateProbeDto) {
+  async update(id: string, probeDto: UpdateProbeDto, user: JwtPayloadDto) {
+    const result = await this.prisma.probes.findUnique({ where: { id } });
+    if (!result) throw new BadRequestException('This probe does not exist');
+    const filtered = Object.keys(probeDto).filter(key => probeDto[key] !== null);
     probeDto.updateAt = dateFormat(new Date());
     const probe = await this.prisma.probes.update({ where: { id }, data: probeDto});
+    let message = 'Update ';
+    for (const key of filtered) message += `${key} from ${result[key]} to ${probe[key]} `;
+    message += `by ${user.name}`;
+    this.rabbitmq.sendHistory('probe', 'update', user.id, message);
     await this.redis.del("device");
     await this.redis.del("listdevice");
-    return probe;
+    return probeDto;
   }
 
   async remove(id: string) {
     this.prisma.probes.delete({ where: { id } });
     await this.redis.del("device");
     await this.redis.del("listdevice");
-    return 'This action removes a #${id} probe';
+    return `This action removes a #${id} probe`;
   }
 }

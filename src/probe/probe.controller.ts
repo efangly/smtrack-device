@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { ProbeService } from './probe.service';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { JwtAuthGuard } from '../common/guards/jwt.guard';
@@ -6,6 +6,7 @@ import { CreateProbeDto } from './dto/create-probe.dto';
 import { UpdateProbeDto } from './dto/update-probe.dto';
 import { Role } from '../common/enums/role.enum';
 import { Roles } from '../common/decorators';
+import { JwtPayloadDto } from '../common/dto';
 
 @Controller('probe')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -14,8 +15,8 @@ export class ProbeController {
 
   @Post()
   @Roles(Role.SUPER, Role.SERVICE)
-  async create(@Body() createProbeDto: CreateProbeDto) {
-    return this.probeService.create(createProbeDto);
+  async create(@Request() req: { user: JwtPayloadDto }, @Body() createProbeDto: CreateProbeDto) {
+    return this.probeService.create(createProbeDto, req.user);
   }
 
   @Get()
@@ -30,8 +31,8 @@ export class ProbeController {
 
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE)
-  async update(@Param('id') id: string, @Body() updateProbeDto: UpdateProbeDto) {
-    return this.probeService.update(id, updateProbeDto);
+  async update(@Request() req: { user: JwtPayloadDto }, @Param('id') id: string, @Body() updateProbeDto: UpdateProbeDto) {
+    return this.probeService.update(id, updateProbeDto, req.user);
   }
 
   @Delete(':id')

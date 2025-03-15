@@ -13,6 +13,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { JwtStrategy, DeviceStrategy } from './common/strategies';
 import { ConsumerModule } from './consumer/consumer.module';
 import { CronModule } from './cron/cron.module';
+import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { CronModule } from './cron/cron.module';
     ConfigsModule, 
     HealthModule, 
     ConsumerModule, 
-    CronModule
+    CronModule, RabbitmqModule
   ],
   providers: [JwtStrategy, DeviceStrategy]
 })

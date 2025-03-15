@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { dateFormat } from '../common/utils';
 import { CreateConfigDto } from './dto/create-config.dto';
@@ -6,11 +6,17 @@ import { UpdateConfigDto } from './dto/update-config.dto';
 import { RedisService } from '../redis/redis.service';
 import { Prisma } from '@prisma/client';
 import { UpdateDeviceDto } from '../device/dto/update-device.dto';
+import { JwtPayloadDto } from '../common/dto';
+import { RabbitmqService } from '../rabbitmq/rabbitmq.service';
 
 
 @Injectable()
 export class ConfigsService {
-  constructor(private readonly prisma: PrismaService, private readonly redis: RedisService) { }
+  constructor(
+    private readonly prisma: PrismaService, 
+    private readonly redis: RedisService,
+    private readonly rabbitmq: RabbitmqService
+  ) {}
   async create(configDto: CreateConfigDto) {
     configDto.createAt = dateFormat(new Date());
     configDto.updateAt = dateFormat(new Date());
@@ -38,15 +44,22 @@ export class ConfigsService {
     return result;
   }
 
-  async update(id: string, configDto: UpdateConfigDto) {
+  async update(id: string, configDto: UpdateConfigDto, user: JwtPayloadDto) {
+    const result = await this.prisma.configs.findUnique({ where: { sn: id } });
+    if (!result) throw new BadRequestException('This config does not exist');
+    const filtered = Object.keys(configDto).filter(key => configDto[key] !== null);
     configDto.updateAt = dateFormat(new Date());
-    const result = await this.prisma.configs.update({
+    const config = await this.prisma.configs.update({
       where: { sn: id },
       data: configDto as unknown as Prisma.ConfigsUpdateInput
     });
+    let message = 'Update ';
+    for (const key of filtered) message += `${key} from ${result[key]} to ${config[key]} `;
+    message += `by ${user.name}`;
+    this.rabbitmq.sendHistory('config', 'update', user.id, message);
     await this.redis.del("device");
     await this.redis.del(`config:${id}`);
-    return result;
+    return config;
   }
 
   async updateVersion(id: string, configDto: UpdateDeviceDto) {

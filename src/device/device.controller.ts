@@ -18,8 +18,8 @@ export class DeviceController {
   @Post()
   @Roles(Role.SUPER)
   @UseInterceptors(FileInterceptor('image'))
-  async create(@Body() createDeviceDto: CreateDeviceDto, @UploadedFile() file: Express.Multer.File) {
-    return this.deviceService.create(createDeviceDto, file);
+  async create(@Request() req: { user: JwtPayloadDto }, @Body() createDeviceDto: CreateDeviceDto, @UploadedFile() file: Express.Multer.File) {
+    return this.deviceService.create(createDeviceDto, file, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -56,15 +56,15 @@ export class DeviceController {
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   @UseInterceptors(FileInterceptor('image'))
-  async update(@Param('id') id: string, @Body() updateDeviceDto: UpdateDeviceDto, @UploadedFile() file: Express.Multer.File) {
-    return this.deviceService.update(id, updateDeviceDto, file);
+  async update(@Request() req: { user: JwtPayloadDto }, @Param('id') id: string, @Body() updateDeviceDto: UpdateDeviceDto, @UploadedFile() file: Express.Multer.File) {
+    return this.deviceService.update(id, updateDeviceDto, file, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
   @Roles(Role.SUPER, Role.SERVICE)
-  async changeDevice(@Param('id') id: string, @Body() changeDeviceDto: ChangeDeviceDto) {
-    return this.deviceService.changeDevice(id, changeDeviceDto);
+  async changeDevice(@Request() req: { user: JwtPayloadDto }, @Param('id') id: string, @Body() changeDeviceDto: ChangeDeviceDto) {
+    return this.deviceService.changeDevice(id, changeDeviceDto, req.user);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
