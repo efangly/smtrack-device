@@ -54,8 +54,8 @@ export class ConfigsService {
       data: configDto as unknown as Prisma.ConfigsUpdateInput
     });
     let message = 'Update ';
-    for (const key of filtered) message += `${key} from ${result[key]} to ${config[key]} `;
-    message += `by ${user.name}`;
+    for (const key of filtered) message += `${key} from ${result[key]} to ${config[key]}`;
+    message += `/${user.name}`;
     this.rabbitmq.sendHistory('config', 'update', user.id, message);
     await this.redis.del("device");
     await this.redis.del(`config:${id}`);

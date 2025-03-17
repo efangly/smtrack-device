@@ -18,7 +18,7 @@ export class ProbeService {
     probeDto.createAt = dateFormat(new Date());
     probeDto.updateAt = dateFormat(new Date());
     const probe = await this.prisma.probes.create({ data: probeDto });
-    this.rabbitmq.sendHistory('probe', 'create', user.id, `Create probe: ${probe.id} with ${probeDto.sn} by ${user.name}`);
+    this.rabbitmq.sendHistory('probe', 'create', user.id, `Create probe: ${probe.id} with ${probeDto.sn}/${user.name}`);
     await this.redis.del("device");
     await this.redis.del("listdevice");
     return probe;
@@ -45,7 +45,7 @@ export class ProbeService {
     const probe = await this.prisma.probes.update({ where: { id }, data: probeDto});
     let message = 'Update ';
     for (const key of filtered) message += `${key} from ${result[key]} to ${probe[key]} `;
-    message += `by ${user.name}`;
+    message += `/${user.name}`;
     this.rabbitmq.sendHistory('probe', 'update', user.id, message);
     await this.redis.del("device");
     await this.redis.del("listdevice");
