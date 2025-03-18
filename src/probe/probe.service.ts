@@ -42,7 +42,7 @@ export class ProbeService {
     if (!result) throw new BadRequestException('This probe does not exist');
     const filtered = Object.keys(probeDto).filter(key => probeDto[key] !== null);
     probeDto.updateAt = dateFormat(new Date());
-    const probe = await this.prisma.probes.update({ where: { id }, data: probeDto});
+    const probe = await this.prisma.probes.update({ where: { id }, data: probeDto });
     let message = 'Update ';
     for (const key of filtered) message += `${key} from ${result[key]} to ${probe[key]} `;
     message += `/${user.name}`;

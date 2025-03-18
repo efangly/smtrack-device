@@ -69,7 +69,6 @@ export class ConfigsService {
       data: configDto
     });
     await this.redis.del("device");
-    await this.redis.del("listdevice");
     return result;
   }
 

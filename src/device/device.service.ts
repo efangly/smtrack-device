@@ -107,7 +107,7 @@ export class DeviceService {
     const cache = await this.redis.get(`list${key}`);
     if (cache) return JSON.parse(cache);
     const device = await this.prisma.devices.findMany({
-      select: { id: true, name: true, staticName: true, ward: true },
+      select: { id: true, name: true, staticName: true, ward: true, wardName: true, hospital: true, hospitalName: true },
       where: conditions,
       orderBy: { seq: 'asc' }
     });
@@ -119,7 +119,7 @@ export class DeviceService {
     const cache = await this.redis.get('deviceinfo');
     if (cache) return JSON.parse(cache);
     const device = await this.prisma.devices.findMany({
-      select: { id: true, name: true, staticName: true, ward: true },
+      select: { id: true, name: true, staticName: true, ward: true, wardName: true, hospital: true, hospitalName: true },
       orderBy: { seq: 'asc' }
     });
     if (device.length > 0) await this.redis.set('deviceinfo', JSON.stringify(device), 3600 * 6);
@@ -173,7 +173,6 @@ export class DeviceService {
     message += `/${user.name}`;
     this.rabbitmq.sendHistory('device', 'update', user.id, message);
     await this.redis.del("device");
-    await this.redis.del("listdevice");
     return device;
   }
 
