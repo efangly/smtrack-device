@@ -69,15 +69,28 @@ export class DeviceService {
     return result;
   }
 
-  async findAll(wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
+  async findAll(filter: string, wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
     const { conditions, key } = this.findCondition(user);
-    const cache = await this.redis.get(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`);
-    if (cache) return JSON.parse(cache);
+    if (!filter) {
+      const cache = await this.redis.get(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`);
+      if (cache) return JSON.parse(cache);
+    }
+    let search = {} as Prisma.DevicesWhereInput;
+    if (filter) {
+      search = {
+        OR: [
+          { name: { contains: filter } },
+          { id: { contains: filter } },
+          { wardName: { contains: filter } },
+          { hospitalName: { contains: filter } }
+        ]
+      };
+    }
     const [devices, total] = await this.prisma.$transaction([
       this.prisma.devices.findMany({
         skip: page ? (parseInt(page) - 1) * parseInt(perpage) : 0,
         take: perpage ? parseInt(perpage) : 10,
-        where: wardId ? { ward: wardId ? wardId : undefined } : conditions,
+        where: filter ? { AND: [wardId ? { ward: wardId } : conditions, search] } : wardId ? { ward: wardId } : conditions,
         include: {
           probe: true,
           config: true,
@@ -86,9 +99,9 @@ export class DeviceService {
         },
         orderBy: { seq: 'asc' }
       }),
-      this.prisma.devices.count({ where: wardId ? { ward: wardId ? wardId : undefined } : conditions })
+      this.prisma.devices.count({ where: filter ? { AND: [wardId ? { ward: wardId } : conditions, search] } : wardId ? { ward: wardId } : conditions })
     ]);
-    if (devices.length > 0) await this.redis.set(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`, JSON.stringify({ total, devices }), 10);
+    if (devices.length > 0 && !filter) await this.redis.set(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`, JSON.stringify({ total, devices }), 10);
     return { total, devices };
   }
 
@@ -107,7 +120,16 @@ export class DeviceService {
     const cache = await this.redis.get(`list${key}`);
     if (cache) return JSON.parse(cache);
     const device = await this.prisma.devices.findMany({
-      select: { id: true, name: true, staticName: true, ward: true, wardName: true, hospital: true, hospitalName: true },
+      select: { 
+        id: true, 
+        name: true, 
+        staticName: true, 
+        ward: true, 
+        wardName: true, 
+        hospital: true, 
+        hospitalName: true, 
+        location: true
+      },
       where: conditions,
       orderBy: { seq: 'asc' }
     });
@@ -395,7 +417,11 @@ export class DeviceService {
         key = "device:HID-DEVELOPMENT";
         break;
       default:
-        conditions = undefined;
+        conditions = {
+          NOT: [
+            { hospital: "0" },
+          ]
+        };
         key = "device";
     }
     return { conditions, key };

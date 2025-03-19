@@ -12,7 +12,7 @@ import { ChangeDeviceDto } from './dto/change-device.dto';
 
 @Controller('device')
 export class DeviceController {
-  constructor(private readonly deviceService: DeviceService) {}
+  constructor(private readonly deviceService: DeviceService) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
@@ -25,8 +25,14 @@ export class DeviceController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.USER)
-  async findAll(@Query('ward') ward: string, @Query('page') page: string, @Query('perpage') perpage: string, @Request() req: { user: JwtPayloadDto }) {
-    return this.deviceService.findAll(ward, page, perpage, req.user);
+  async findAll(
+    @Query('filter') filter: string,
+    @Query('ward') ward: string,
+    @Query('page') page: string,
+    @Query('perpage') perpage: string,
+    @Request() req: { user: JwtPayloadDto }
+  ) {
+    return this.deviceService.findAll(filter, ward, page, perpage, req.user);
   }
 
   @UseGuards(JwtAuthGuard)
