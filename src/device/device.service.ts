@@ -62,7 +62,7 @@ export class DeviceService {
       firmware: result.firmware,
       remark: result.remark
     });
-    this.rabbitmq.sendHistory('device', 'create', user.id, `Create device: ${device.id}/${user.name}`);
+    this.rabbitmq.sendHistory(result.id, 'create', user.id, `Create device: ${device.id}/${user.name}`);
     await this.redis.del("device");
     await this.redis.del("listdevice");
     await this.redis.del("deviceinfo");
@@ -190,10 +190,10 @@ export class DeviceService {
       firmware: device.firmware,
       remark: device.remark
     });
-    let message = 'Update ';
+    let message = 'Update device';
     for (const key of filtered) message += `${key} from ${result[key]} to ${device[key]}`;
     message += `/${user.name}`;
-    this.rabbitmq.sendHistory('device', 'update', user.id, message);
+    this.rabbitmq.sendHistory(device.id, 'update', user.id, message);
     await this.redis.del("device");
     return device;
   }
@@ -365,7 +365,7 @@ export class DeviceService {
         }
       });
     }
-    this.rabbitmq.sendHistory('device', 'update', user.id, `Change device: ${id} to ${device.id}/${user.name}`);
+    this.rabbitmq.sendHistory(id, 'update', user.id, `Change device: ${id} to ${device.id}/${user.name}`);
     await this.redis.del("device");
     await this.redis.del("listdevice");
     return 'Change device successfully';
