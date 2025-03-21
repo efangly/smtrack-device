@@ -190,10 +190,11 @@ export class DeviceService {
       firmware: device.firmware,
       remark: device.remark
     });
-    let message = 'Update device';
-    for (const key of filtered) message += `${key} from ${result[key]} to ${device[key]}`;
-    message += `/${user.name}`;
-    this.rabbitmq.sendHistory(device.id, 'update', user.id, message);
+    let message = '';
+    for (const key of filtered) {
+      if (result[key] !== device[key]) message += ` ${key} from ${result[key]} to ${device[key]}`;
+    }
+    if (message !== '') this.rabbitmq.sendHistory(device.id, 'update', user.id, `Update device:${message}/${user.name}`);
     await this.redis.del("device");
     return device;
   }

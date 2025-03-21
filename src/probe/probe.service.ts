@@ -43,10 +43,11 @@ export class ProbeService {
     const filtered = Object.keys(probeDto).filter(key => probeDto[key] !== null);
     probeDto.updateAt = dateFormat(new Date());
     const probe = await this.prisma.probes.update({ where: { id }, data: probeDto });
-    let message = 'Update probe ';
-    for (const key of filtered) message += `${key} from ${result[key]} to ${probe[key]} `;
-    message += `/${user.name}`;
-    this.rabbitmq.sendHistory(probe.sn, 'update', user.id, message);
+    let message = '';
+    for (const key of filtered) {
+      if (result[key] !== probe[key]) message += ` ${key} from ${result[key]} to ${probe[key]}`;
+    }
+    if (message !== '') this.rabbitmq.sendHistory(probe.sn, 'update', user.id, `Update probe:${message}/${user.name}`);
     await this.redis.del("device");
     await this.redis.del("listdevice");
     return probeDto;
