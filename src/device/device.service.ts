@@ -171,7 +171,7 @@ export class DeviceService {
     const result = await this.prisma.devices.findUnique({ where: { id } });
     if (!result) throw new BadRequestException('This device does not exist');
     if (file) {
-      deviceDto.positionPic = await uploadFile(file, 'devices');
+      deviceDto.positionPic = await uploadFile(file, 'device');
       if (result.positionPic) {
         const fileName = result.positionPic.split('/')[result.positionPic.split('/').length - 1];
         await axios.delete(`${process.env.UPLOAD_PATH}/media/image/devices/${fileName}`);
