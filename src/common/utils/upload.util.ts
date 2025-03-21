@@ -5,16 +5,15 @@ export const uploadFile = async (file: Express.Multer.File, path: string): Promi
   try {
     const formData = new FormData();
     const blob = new Blob([file.buffer], { type: file.mimetype });
-    formData.append('path', path);
     formData.append('file', blob, file.originalname);
-    const response = await axios.post(`${process.env.UPLOAD_PATH}/api/image`, formData, 
+    const response = await axios.post(`${process.env.UPLOAD_PATH}/api/image/${path}`, formData, 
       { headers: { "Content-Type": "multipart/form-data" } }
     );
   
-    if (!response.data || !response.data.filePath) {
+    if (!response.data || !response.data.path) {
       throw new BadRequestException('Failed to upload image');
     }
-    return `${process.env.UPLOAD_PATH}/${response.data.filePath}`;
+    return `${process.env.UPLOAD_PATH}/${response.data.path}`;
   } catch (error) {
     const logger = new Logger('UploadFile');
     logger.error(error.message);
