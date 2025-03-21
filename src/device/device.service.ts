@@ -174,7 +174,7 @@ export class DeviceService {
       deviceDto.positionPic = await uploadFile(file, 'device');
       if (result.positionPic) {
         const fileName = result.positionPic.split('/')[result.positionPic.split('/').length - 1];
-        await axios.delete(`${process.env.UPLOAD_PATH}/media/image/devices/${fileName}`);
+        await axios.delete(`${process.env.UPLOAD_PATH}/api/image/device/${fileName}`);
       }
     }
     const filtered = Object.keys(deviceDto).filter(key => deviceDto[key] !== null);

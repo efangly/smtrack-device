@@ -13,7 +13,7 @@ export const uploadFile = async (file: Express.Multer.File, path: string): Promi
     if (!response.data || !response.data.path) {
       throw new BadRequestException('Failed to upload image');
     }
-    return `${process.env.UPLOAD_PATH}/${response.data.path}`;
+    return `${process.env.UPLOAD_PATH}${response.data.path}`;
   } catch (error) {
     const logger = new Logger('UploadFile');
     logger.error(error.message);
