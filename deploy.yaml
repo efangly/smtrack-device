@@ -4,7 +4,7 @@ metadata:
   name: device
   namespace: smtrack
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: device
@@ -15,8 +15,7 @@ spec:
     spec:
       containers:
       - name: device
-        image: siamatic/smtrack-device-service:latest
-        imagePullPolicy: Always
+        image: siamatic/smtrack-device-service:1.0.0
         ports:
         - containerPort: 8080
         readinessProbe:

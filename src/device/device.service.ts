@@ -71,10 +71,6 @@ export class DeviceService {
 
   async findAll(filter: string, wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
     const { conditions, key } = this.findCondition(user);
-    if (!filter) {
-      const cache = await this.redis.get(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`);
-      if (cache) return JSON.parse(cache);
-    }
     let search = {} as Prisma.DevicesWhereInput;
     if (filter) {
       search = {
@@ -85,6 +81,9 @@ export class DeviceService {
           { hospitalName: { contains: filter } }
         ]
       };
+    } else {
+      const cache = await this.redis.get(wardId ? `device:${wardId}${page || 0}${perpage || 10}` : `${key}${page || 0}${perpage || 10}`);
+      if (cache) return JSON.parse(cache);
     }
     const [devices, total] = await this.prisma.$transaction([
       this.prisma.devices.findMany({
@@ -120,14 +119,14 @@ export class DeviceService {
     const cache = await this.redis.get(`list${key}`);
     if (cache) return JSON.parse(cache);
     const device = await this.prisma.devices.findMany({
-      select: { 
-        id: true, 
-        name: true, 
-        staticName: true, 
-        ward: true, 
-        wardName: true, 
-        hospital: true, 
-        hospitalName: true, 
+      select: {
+        id: true,
+        name: true,
+        staticName: true,
+        ward: true,
+        wardName: true,
+        hospital: true,
+        hospitalName: true,
         location: true
       },
       where: conditions,
@@ -404,7 +403,25 @@ export class DeviceService {
         };
         key = `device:${user.hosId}`;
         break;
+      case "LEGACY_ADMIN":
+        conditions = {
+          AND: [
+            { hospital: user.hosId },
+            {
+              NOT: [
+                { hospital: "HID-DEVELOPMENT" },
+                { ward: "WID-DEVELOPMENT" }
+              ]
+            }
+          ]
+        };
+        key = `device:${user.hosId}`;
+        break;
       case "USER":
+        conditions = { ward: user.wardId };
+        key = `device:${user.wardId}`;
+        break;
+      case "LEGACY_USER":
         conditions = { ward: user.wardId };
         key = `device:${user.wardId}`;
         break;

@@ -74,7 +74,25 @@ export class RepairService {
         };
         key = `repair:${user.hosId}`;
         break;
+      case "LEGACY_ADMIN":
+        conditions = {
+          AND: [
+            { device: { hospital: user.hosId } },
+            {
+              NOT: [
+                { device: { hospital: 'HID-DEVELOPMENT' } },
+                { device: { ward: 'WID-DEVELOPMENT' } }
+              ]
+            }
+          ]
+        };
+        key = `repair:${user.hosId}`;
+        break;
       case "USER":
+        conditions = { device: { ward: user.wardId } };
+        key = `repair:${user.wardId}`;
+        break;
+      case "LEGACY_USER":
         conditions = { device: { ward: user.wardId } };
         key = `repair:${user.wardId}`;
         break;

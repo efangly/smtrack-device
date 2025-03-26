@@ -48,7 +48,7 @@ export class WarrantyService {
 
   async update(id: string, warrantyDto: UpdateWarrantyDto) {
     warrantyDto.updateAt = dateFormat(new Date());
-    const result = await this.prisma.warranties.update({where: { id }, data: warrantyDto });
+    const result = await this.prisma.warranties.update({ where: { id }, data: warrantyDto });
     await this.redis.del('warranty');
     return result
   }
@@ -77,7 +77,25 @@ export class WarrantyService {
         };
         key = `warranty:${user.hosId}`;
         break;
+      case 'LEGACY_ADMIN':
+        conditions = {
+          AND: [
+            { device: { hospital: user.hosId } },
+            {
+              NOT: [
+                { device: { hospital: 'HID-DEVELOPMENT' } },
+                { device: { ward: 'WID-DEVELOPMENT' } }
+              ]
+            }
+          ]
+        };
+        key = `warranty:${user.hosId}`;
+        break;
       case 'USER':
+        conditions = { device: { ward: user.wardId } };
+        key = `warranty:${user.wardId}`;
+        break;
+      case 'LEGACY_USER':
         conditions = { device: { ward: user.wardId } };
         key = `warranty:${user.wardId}`;
         break;
