@@ -127,7 +127,8 @@ export class DeviceService {
         wardName: true,
         hospital: true,
         hospitalName: true,
-        location: true
+        location: true,
+        firmware: true
       },
       where: conditions,
       orderBy: { seq: 'asc' }
