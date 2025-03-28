@@ -36,6 +36,7 @@ export class ConfigsService {
         id: true,
         name: true,
         status: true,
+        token: true,
         probe: true,
         config: true
       }

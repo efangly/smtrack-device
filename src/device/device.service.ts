@@ -105,12 +105,15 @@ export class DeviceService {
   }
 
   async findDashboard(user: JwtPayloadDto, token: string) {
-    const { conditions } = this.findCondition(user);
+    const { key, conditions } = this.findCondition(user);
+    const cache = await this.redis.get(`dashboard${key}`);
+    if (cache) return JSON.parse(cache);
     const result = await axios.get(`${process.env.LOG_URL}/notification/dashboard/count`, { headers: { Authorization: token } });
     const [warranties, repairs] = await this.prisma.$transaction([
       this.prisma.warranties.count({ where: { device: conditions } }),
       this.prisma.repairs.count({ where: { device: conditions } })
     ]);
+    await this.redis.set(`dashboard${key}`, JSON.stringify({ warranties, repairs, ...result.data.data }), 15);
     return { warranties, repairs, ...result.data.data };
   }
 
@@ -370,6 +373,15 @@ export class DeviceService {
     await this.redis.del("device");
     await this.redis.del("listdevice");
     return 'Change device successfully';
+  }
+
+  async changeToken(id: string) {
+    const device = await this.prisma.devices.findUnique({ where: { id }, select: { token: true } });
+    if (!device) throw new BadRequestException('This device does not exist');
+    const token = this.jwt.sign({ sn: id }, { secret: process.env.DEVICE_SECRET });
+    const result = await this.prisma.devices.update({ where: { id }, data: { token } });
+    await this.redis.del(`config:${id}`);
+    return result;
   }
 
   async remove(id: string) {
