@@ -381,7 +381,7 @@ export class DeviceService {
     const token = this.jwt.sign({ sn: id }, { secret: process.env.DEVICE_SECRET });
     const result = await this.prisma.devices.update({ where: { id }, data: { token } });
     await this.redis.del(`config:${id}`);
-    return result;
+    return { sn: result.id, token: result.token };
   }
 
   async remove(id: string) {

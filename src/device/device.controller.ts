@@ -58,6 +58,11 @@ export class DeviceController {
     return this.deviceService.deviceInfo();
   }
 
+  @Get('change/token/:id')
+  async changeToken(@Param('id') id: string) {
+    return this.deviceService.changeToken(id);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id')
   @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
