@@ -31,6 +31,7 @@ export class AdjustService {
     await this.prisma.devices.update({ where: { id }, data: { name: deviceDto.name } });
     await this.redis.del(`devices:${id}`);
     await this.redis.del("device");
+    await this.redis.del(`config:${id}`);
     await this.redis.del("listdevice");
     await this.redis.del("deviceinfo");
     return deviceDto;
