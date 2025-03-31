@@ -12,9 +12,10 @@ export class AdjustService {
 
   async updateProbe(id: string, probeDto: UpdateProbeDto) {
     probeDto.updateAt = dateFormat(new Date());
-    await this.prisma.probes.update({ where: { id }, data: probeDto });
+    const probe = await this.prisma.probes.update({ where: { id }, data: probeDto });
     await this.redis.del("device");
-    await this.redis.del(`devices:${id}`);
+    await this.redis.del(`devices:${probe.sn}`);
+    await this.redis.del(`config:${probe.sn}`);
     return probeDto;
   }
 
