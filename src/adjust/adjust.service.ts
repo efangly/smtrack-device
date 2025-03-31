@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProbeDto } from '../probe/dto/update-probe.dto';
 import { dateFormat } from '../common/utils';
 import { RedisService } from '../redis/redis.service';
 import { UpdateConfigDto } from '../configs/dto/update-config.dto';
+import { UpdateDeviceDto } from 'src/device/dto/update-device.dto';
 
 @Injectable()
 export class AdjustService {
@@ -21,5 +22,14 @@ export class AdjustService {
     await this.redis.del("device");
     await this.redis.del(`config:${id}`);
     return configDto;
+  }
+
+  async updateDeviceName(id: string, deviceDto: UpdateDeviceDto) {
+    if (!deviceDto.name) throw new BadRequestException("Device name is required");
+    await this.prisma.devices.update({ where: { id }, data: { name: deviceDto.name } });
+    await this.redis.del("device");
+    await this.redis.del("listdevice");
+    await this.redis.del("deviceinfo");
+    return deviceDto;
   }
 }
