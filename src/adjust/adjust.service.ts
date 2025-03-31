@@ -14,12 +14,14 @@ export class AdjustService {
     probeDto.updateAt = dateFormat(new Date());
     await this.prisma.probes.update({ where: { id }, data: probeDto });
     await this.redis.del("device");
+    await this.redis.del(`devices:${id}`);
     return probeDto;
   }
 
   async updateConfig(id: string, configDto: UpdateConfigDto) {
     await this.prisma.configs.update({ where: { sn: id }, data: configDto });
     await this.redis.del("device");
+    await this.redis.del(`devices:${id}`);
     await this.redis.del(`config:${id}`);
     return configDto;
   }
@@ -27,6 +29,7 @@ export class AdjustService {
   async updateDeviceName(id: string, deviceDto: UpdateDeviceDto) {
     if (!deviceDto.name) throw new BadRequestException("Device name is required");
     await this.prisma.devices.update({ where: { id }, data: { name: deviceDto.name } });
+    await this.redis.del(`devices:${id}`);
     await this.redis.del("device");
     await this.redis.del("listdevice");
     await this.redis.del("deviceinfo");
