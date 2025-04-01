@@ -60,6 +60,8 @@ export class DeviceService {
       status: result.status,
       seq: result.seq,
       firmware: result.firmware,
+      position: result.position,
+      positionPic: result.positionPic,
       remark: result.remark
     });
     this.rabbitmq.sendHistory(result.id, 'create', user.id, `Create device: ${device.id}/${user.name}`);
@@ -191,6 +193,8 @@ export class DeviceService {
       name: device.name,
       status: device.status,
       firmware: device.firmware,
+      position: result.position,
+      positionPic: result.positionPic,
       remark: device.remark
     });
     let message = '';

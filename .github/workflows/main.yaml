@@ -22,20 +22,20 @@ jobs:
       with:
         context: .
         push: true
-        tags: siamatic/smtrack-device-service:1.0.5-b
+        tags: siamatic/smtrack-device-service:1.0.5-c
     - name: Send success message to slack
       id: slack
       uses: slackapi/slack-github-action@v1.27.0
       with:
         payload: |
           {
-            "text": "GitHub Action build siamatic/smtrack-device-service:1.0.5-b result: ${{ job.status }} 🖕🏿🖕🏿🖕🏿🖕🏿🖕🏿",
+            "text": "GitHub Action build siamatic/smtrack-device-service:1.0.5-c result: ${{ job.status }} 🖕🏿🖕🏿🖕🏿🖕🏿🖕🏿",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "GitHub Action build siamatic/smtrack-device-service:1.0.5-b result: ${{ job.status }} 🖕🏿🖕🏿🖕🏿🖕🏿🖕🏿"
+                  "text": "GitHub Action build siamatic/smtrack-device-service:1.0.5-c result: ${{ job.status }} 🖕🏿🖕🏿🖕🏿🖕🏿🖕🏿"
                 }
               }
             ]
