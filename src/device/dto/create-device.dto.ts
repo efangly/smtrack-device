@@ -13,8 +13,18 @@ export class CreateDeviceDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(200)
+  wardName: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(100)
   hospital: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  hospitalName: string;
 
   @IsOptional()
   @IsString()

@@ -216,9 +216,9 @@ export class DeviceService {
         where: { id },
         data: {
           ward: 'WID-DEVELOPMENT',
-          wardName: 'WARD-DEV',
+          wardName: 'DEV',
           hospital: 'HID-DEVELOPMENT',
-          hospitalName: 'HOSPITAL-DEV',
+          hospitalName: 'Siamatic',
           staticName: uuidv4(),
           name: null,
           status: false,
