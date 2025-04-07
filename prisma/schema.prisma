@@ -65,7 +65,7 @@ model Probes {
   notiDelay             Int      @default(0) //ดีเลการส่งแจ้งเตือน 0 คือส่งทันที
   notiToNormal          Boolean  @default(true) //ส่งแจ้งเตือนหลังอุณหภูมิกลับมาปกติ
   notiMobile            Boolean  @default(true) //เปิดปิดการแจ้งเตือนไปยังมือถือ
-  notiRepeat            Int      @default(1) //ตั้งค่าการส่งซ้ำ ค่าเริ่มต้นคือ 1
+  notiRepeat            Int      @default(0) //ตั้งค่าการส่งซ้ำ ค่าเริ่มต้นคือ 1
   firstDay              Day      @default(OFF)
   secondDay             Day      @default(OFF)
   thirdDay              Day      @default(OFF)
