@@ -24,7 +24,6 @@ export class DeviceController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.USER)
   async findAll(
     @Query('filter') filter: string,
     @Query('ward') ward: string,
@@ -65,7 +64,7 @@ export class DeviceController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Put(':id')
-  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN)
   @UseInterceptors(FileInterceptor('image'))
   async update(@Request() req: { user: JwtPayloadDto }, @Param('id') id: string, @Body() updateDeviceDto: UpdateDeviceDto, @UploadedFile() file: Express.Multer.File) {
     return this.deviceService.update(id, updateDeviceDto, file, req.user);
