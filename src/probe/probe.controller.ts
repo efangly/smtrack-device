@@ -30,7 +30,7 @@ export class ProbeController {
   }
 
   @Put(':id')
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   async update(@Request() req: { user: JwtPayloadDto }, @Param('id') id: string, @Body() updateProbeDto: UpdateProbeDto) {
     return this.probeService.update(id, updateProbeDto, req.user);
   }

@@ -26,9 +26,7 @@ export class ProbeService {
 
   async findAll() {
     const probe = await this.prisma.probes.findMany({
-      include: {
-        device: { include: { log: true } }
-      }
+      include: { device: { include: { log: true } } }
     });
     return probe;
   }

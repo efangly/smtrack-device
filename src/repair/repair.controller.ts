@@ -14,7 +14,7 @@ export class RepairController {
   constructor(private readonly repairService: RepairService) {}
 
   @Post()
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   async create(@Body() createRepairDto: CreateRepairDto) {
     return this.repairService.create(createRepairDto);
   }

@@ -30,7 +30,7 @@ export class ConfigsController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN)
   async update(@Request() req: { user: JwtPayloadDto }, @Param('id') id: string, @Body() updateConfigDto: UpdateConfigDto) {
     return this.configsService.update(id, updateConfigDto, req.user);
   }
@@ -42,7 +42,7 @@ export class ConfigsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.SUPER, Role.SERVICE)
+  @Roles(Role.SUPER)
   async remove(@Param('id') id: string) {
     return this.configsService.remove(id);
   }
