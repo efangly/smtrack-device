@@ -47,6 +47,7 @@ export class ProbeService {
     }
     if (message !== '') this.rabbitmq.sendHistory(probe.sn, 'update', user.id, `Update probe:${message}/${user.name}`);
     await this.redis.del("device");
+    await this.redis.del(`config:${probe.sn}`);
     await this.redis.del("listdevice");
     return probeDto;
   }
