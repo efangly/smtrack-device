@@ -24,6 +24,7 @@ export class DeviceController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get()
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN, Role.USER)
   async findAll(
     @Query('filter') filter: string,
     @Query('ward') ward: string,
@@ -36,18 +37,21 @@ export class DeviceController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN, Role.USER)
   async findOne(@Param('id') id: string) {
     return this.deviceService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('dashboard/count')
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN, Role.USER)
   async getDashboard(@Request() req: { user: JwtPayloadDto }, @Req() request: Request) {
     return this.deviceService.findDashboard(req.user, request.headers['authorization']);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('dashboard/device')
+  @Roles(Role.SUPER, Role.SERVICE, Role.ADMIN, Role.LEGACY_ADMIN, Role.USER)
   async getDeviceList(@Request() req: { user: JwtPayloadDto }) {
     return this.deviceService.deviceList(req.user);
   }
