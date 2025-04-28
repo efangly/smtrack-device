@@ -66,7 +66,7 @@ export class DeviceService {
     });
     this.rabbitmq.sendHistory(result.id, 'create', user.id, `Create device: ${device.id}/${user.name}`);
     await this.redis.del("device");
-    await this.redis.del("listdevice");
+    await this.redis.del("list");
     await this.redis.del("deviceinfo");
     return result;
   }

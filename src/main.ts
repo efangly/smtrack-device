@@ -1,6 +1,5 @@
 import { NestFactory, Reflector } from '@nestjs/core'
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ConsumerModule } from './consumer/consumer.module';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
@@ -14,7 +13,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.setGlobalPrefix('devices');
-  const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(ConsumerModule, {
+  const microservice = app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
       urls: [process.env.RABBITMQ],
