@@ -53,9 +53,10 @@ export class ProbeService {
   }
 
   async remove(id: string) {
-    this.prisma.probes.delete({ where: { id } });
-    await this.redis.del("device");
-    await this.redis.del("listdevice");
+    const probe = await this.prisma.probes.delete({ where: { id } });
+    await this.redis.del('device');
+    await this.redis.del(`config:${probe.sn}`);
+    await this.redis.del('listdevice');
     return `This action removes a #${id} probe`;
   }
 }

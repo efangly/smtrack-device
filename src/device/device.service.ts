@@ -202,7 +202,11 @@ export class DeviceService {
       if (result[key] !== device[key]) message += ` ${key} from ${result[key]} to ${device[key]}`;
     }
     if (message !== '') this.rabbitmq.sendHistory(device.id, 'update', user.id, `Update device:${message}/${user.name}`);
-    await this.redis.del("device");
+    await this.redis.del('devices');
+    await this.redis.del('device');
+    await this.redis.del('config');
+    await this.redis.del('listdevice');
+    await this.redis.del('deviceinfo');
     return device;
   }
 

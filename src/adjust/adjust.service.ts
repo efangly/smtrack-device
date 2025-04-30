@@ -12,29 +12,29 @@ export class AdjustService {
 
   async updateProbe(id: string, probeDto: UpdateProbeDto) {
     probeDto.updateAt = dateFormat(new Date());
-    const probe = await this.prisma.probes.update({ where: { id }, data: probeDto });
-    await this.redis.del("device");
-    await this.redis.del(`devices:${probe.sn}`);
-    await this.redis.del(`config:${probe.sn}`);
+    await this.prisma.probes.update({ where: { id }, data: probeDto });
+    await this.redis.del('device');
+    await this.redis.del('devices');
+    await this.redis.del('config');
     return probeDto;
   }
 
   async updateConfig(id: string, configDto: UpdateConfigDto) {
     await this.prisma.configs.update({ where: { sn: id }, data: configDto });
-    await this.redis.del("device");
-    await this.redis.del(`devices:${id}`);
-    await this.redis.del(`config:${id}`);
+    await this.redis.del('device');
+    await this.redis.del('devices');
+    await this.redis.del('config');
     return configDto;
   }
 
   async updateDeviceName(id: string, deviceDto: UpdateDeviceDto) {
     if (!deviceDto.name) throw new BadRequestException("Device name is required");
     await this.prisma.devices.update({ where: { id }, data: { name: deviceDto.name } });
-    await this.redis.del(`devices:${id}`);
-    await this.redis.del("device");
-    await this.redis.del(`config:${id}`);
-    await this.redis.del("listdevice");
-    await this.redis.del("deviceinfo");
+    await this.redis.del('devices');
+    await this.redis.del('device');
+    await this.redis.del('config');
+    await this.redis.del('listdevice');
+    await this.redis.del('deviceinfo');
     return deviceDto;
   }
 }

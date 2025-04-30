@@ -75,6 +75,7 @@ export class ConfigsService {
   }
 
   async remove(id: string) {
-    return this.prisma.configs.delete({ where: { id: id } });
+    await this.prisma.configs.delete({ where: { id: id } });
+    return 'This config has been deleted';
   }
 }
