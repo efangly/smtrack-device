@@ -19,8 +19,9 @@ export class ProbeService {
     probeDto.updateAt = dateFormat(new Date());
     const probe = await this.prisma.probes.create({ data: probeDto });
     this.rabbitmq.sendHistory(probe.sn, 'create', user.id, `Create probe: ${probe.id} with ${probeDto.sn}/${user.name}`);
-    await this.redis.del("device");
-    await this.redis.del("listdevice");
+    await this.redis.del('device');
+    await this.redis.del('config');
+    await this.redis.del('listdevice');
     return probe;
   }
 
@@ -46,16 +47,16 @@ export class ProbeService {
       if (result[key] !== probe[key]) message += ` ${key} from ${result[key]} to ${probe[key]}`;
     }
     if (message !== '') this.rabbitmq.sendHistory(probe.sn, 'update', user.id, `Update probe:${message}/${user.name}`);
-    await this.redis.del("device");
-    await this.redis.del(`config:${probe.sn}`);
-    await this.redis.del("listdevice");
+    await this.redis.del('device');
+    await this.redis.del('config');
+    await this.redis.del('listdevice');
     return probeDto;
   }
 
   async remove(id: string) {
     const probe = await this.prisma.probes.delete({ where: { id } });
     await this.redis.del('device');
-    await this.redis.del(`config:${probe.sn}`);
+    await this.redis.del('config');
     await this.redis.del('listdevice');
     return `This action removes a #${id} probe`;
   }
