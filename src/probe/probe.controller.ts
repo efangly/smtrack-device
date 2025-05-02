@@ -20,8 +20,8 @@ export class ProbeController {
   }
 
   @Get()
-  async findAll() {
-    return this.probeService.findAll();
+  async findAll(@Request() req: { user: JwtPayloadDto }) {
+    return this.probeService.findAll(req.user);
   }
 
   @Get(':id')

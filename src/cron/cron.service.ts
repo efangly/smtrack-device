@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { format, toDate } from "date-fns";
 import { ProbeService } from '../probe/probe.service';
 import { dateFormat } from '../common/utils';
+import { JwtPayloadDto } from '../common/dto';
 
 @Injectable()
 export class CronService {
@@ -31,7 +32,8 @@ export class CronService {
   }
 
   async handleProbe() {
-    const probe = await this.probe.findAll();
+    const user = { role: 'SUPER' } as JwtPayloadDto;
+    const probe = await this.probe.findAll(user);
     if (probe.length === 0) return;
     const device = probe.filter((device) => device.firstDay === "ALL"
       || device.firstDay === format(new Date(), "eee").toUpperCase()
