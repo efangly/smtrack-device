@@ -32,7 +32,10 @@ export class AdjustService {
   async getProbe() {
     const cache = await this.redis.get('probe');
     if (cache) return JSON.parse(cache);
-    const probe = await this.prisma.probes.findMany();
+    const probe = await this.prisma.probes.findMany({
+      include: { device: { include: { log: true } } },
+      orderBy: { device: { seq: 'asc' } }
+    });
     await this.redis.set('probe', JSON.stringify(probe), 3600 * 6);
     return probe;
   }
