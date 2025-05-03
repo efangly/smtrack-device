@@ -15,6 +15,11 @@ export class AdjustController {
     return this.adjustService.getOnlineStatus(hospital, ward);
   }
 
+  @Get('schedule')
+  async getProbe() {
+    return this.adjustService.getProbe();
+  }
+
   @Put('adjust/:id')
   async updateProbe(@Param('id') id: string, @Body() updateConfig: UpdateProbeDto) {
     return this.adjustService.updateProbe(id, updateConfig);

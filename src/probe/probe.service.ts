@@ -68,6 +68,7 @@ export class ProbeService {
     await this.redis.del('device');
     await this.redis.del('config');
     await this.redis.del('listdevice');
+    await this.redis.del('probe');
     return `This action removes a #${id} probe`;
   }
 

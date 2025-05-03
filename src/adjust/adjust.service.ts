@@ -29,6 +29,14 @@ export class AdjustService {
     return result;
   }
 
+  async getProbe() {
+    const cache = await this.redis.get('probe');
+    if (cache) return JSON.parse(cache);
+    const probe = await this.prisma.probes.findMany();
+    await this.redis.set('probe', JSON.stringify(probe), 3600 * 6);
+    return probe;
+  }
+
   async updateProbe(id: string, probeDto: UpdateProbeDto) {
     probeDto.updateAt = dateFormat(new Date());
     await this.prisma.probes.update({ where: { id }, data: probeDto });
