@@ -3,6 +3,11 @@ import { EventPattern, Ctx, Payload, RmqContext } from '@nestjs/microservices';
 import { CreateLogdayDto } from './dto/create-logday.dto';
 import { ConsumerService } from './consumer.service';
 import { OnlineDto } from './dto/online.dto';
+import { UpdateDeviceDto } from '../device/dto/update-device.dto';
+import { UpdateConfigDto } from '../configs/dto/update-config.dto';
+import { UpdateProbeDto } from '../probe/dto/update-probe.dto';
+import { CreateRepairDto } from '../repair/dto/create-repair.dto';
+import { CreateWarrantyDto } from '../warranty/dto/create-warranty.dto';
 
 @Controller()
 export class ConsumerController {
@@ -53,6 +58,71 @@ export class ConsumerController {
     const message = context.getMessage();
     try {
       await this.consumerService.updateWard(data);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+
+  @EventPattern('update-device')
+  async updateDevice(@Payload() data: { id: string, device: UpdateDeviceDto }, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.consumerService.updateDevice(data);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+
+  @EventPattern('update-config')
+  async updateConfig(@Payload() data: { id: string, config: UpdateConfigDto }, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.consumerService.updateConfig(data);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+
+  @EventPattern('update-probe')
+  async updateProbe(@Payload() data: { id: string, probe: UpdateProbeDto }, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.consumerService.updateProbe(data);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+
+  @EventPattern('create-repair')
+  async createRepair(@Payload() data: CreateRepairDto, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.consumerService.createRepair(data);
+      channel.ack(message);
+    } catch (error) {
+      this.logger.error(error);
+      channel.nack(message, false, false);
+    }
+  }
+
+  @EventPattern('create-warranty')
+  async createWarranty(@Payload() data: CreateWarrantyDto, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    try {
+      await this.consumerService.createWarranty(data);
       channel.ack(message);
     } catch (error) {
       this.logger.error(error);

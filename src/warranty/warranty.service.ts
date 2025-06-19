@@ -33,6 +33,7 @@ export class WarrantyService {
             name: true,
             location: true,
             position: true,
+            probe: { select: { name: true } }
           }
         }
       },

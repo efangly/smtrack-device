@@ -5,6 +5,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OnlineDto } from './dto/online.dto';
 import { ClientProxy } from '@nestjs/microservices';
 import { RedisService } from '../redis/redis.service';
+import { UpdateConfigDto } from 'src/configs/dto/update-config.dto';
+import { UpdateProbeDto } from 'src/probe/dto/update-probe.dto';
+import { UpdateDeviceDto } from 'src/device/dto/update-device.dto';
+import { CreateRepairDto } from 'src/repair/dto/create-repair.dto';
+import { CreateWarrantyDto } from 'src/warranty/dto/create-warranty.dto';
 
 @Injectable()
 export class ConsumerService {
@@ -52,5 +57,49 @@ export class ConsumerService {
     await this.redis.del("device");
     await this.redis.del("list");
     await this.redis.del("deviceinfo");
+  }
+
+  async updateDevice(data: { id: string, device: UpdateDeviceDto }) {
+    await this.prisma.devices.update({
+      where: { id: data.id },
+      data: data.device
+    });
+    await this.redis.del("device");
+    await this.redis.del("list");
+    await this.redis.del("deviceinfo");
+  }
+
+  async updateConfig(data: { id: string, config: UpdateConfigDto }) {
+    await this.prisma.configs.update({
+      where: { sn: data.id },
+      data: data.config
+    });
+    await this.redis.del("device");
+    await this.redis.del("list");
+    await this.redis.del("deviceinfo");
+  }
+
+  async updateProbe(data: { id: string, probe: UpdateProbeDto }) {
+    await this.prisma.probes.updateMany({
+      where: { sn: data.id },
+      data: data.probe
+    });
+    await this.redis.del("device");
+    await this.redis.del("list");
+    await this.redis.del("deviceinfo");
+  }
+
+  async createRepair(data: CreateRepairDto) {
+    data.createAt = dateFormat(new Date());
+    data.updateAt = dateFormat(new Date());
+    await this.prisma.repairs.create({ data });
+    await this.redis.del("repair");
+  }
+
+  async createWarranty(data: CreateWarrantyDto) {
+    data.createAt = dateFormat(new Date());
+    data.updateAt = dateFormat(new Date());
+    await this.prisma.warranties.create({ data });
+    await this.redis.del("warranty");
   }
 }

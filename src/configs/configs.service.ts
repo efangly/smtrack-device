@@ -58,7 +58,10 @@ export class ConfigsService {
     for (const key of filtered) {
       if (result[key] !== config[key]) message += ` ${key} from ${result[key]} to ${config[key]}`;
     }
-    if (message !== '') this.rabbitmq.sendHistory(id, 'update', user.id, `Update config:${message}/${user.name}`);
+    if (message !== '') {
+      this.rabbitmq.sendHistory(id, 'update', user.id, `Update config:${message}/${user.name}`);
+      this.rabbitmq.sendLegacy('config', id, configDto);
+    }
     await this.redis.del("device");
     await this.redis.del(`config:${id}`);
     return config;

@@ -55,7 +55,10 @@ export class ProbeService {
     for (const key of filtered) {
       if (result[key] !== probe[key]) message += ` ${key} from ${result[key]} to ${probe[key]}`;
     }
-    if (message !== '') this.rabbitmq.sendHistory(probe.sn, 'update', user.id, `Update probe:${message}/${user.name}`);
+    if (message !== '') {
+      this.rabbitmq.sendHistory(probe.sn, 'update', user.id, `Update probe:${message}/${user.name}`);
+      this.rabbitmq.sendLegacy('probe', probe.sn, probeDto);
+    }
     await this.redis.del('device');
     await this.redis.del('config');
     await this.redis.del('listdevice');
