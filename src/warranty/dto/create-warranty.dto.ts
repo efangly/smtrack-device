@@ -57,6 +57,11 @@ export class CreateWarrantyDto {
   @IsBoolean()
   status: boolean;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  note: string;
+
   @IsDate()
   @IsOptional()
   createAt: Date;
