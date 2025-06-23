@@ -60,7 +60,7 @@ export class ConfigsService {
     }
     if (message !== '') {
       this.rabbitmq.sendHistory(id, 'update', user.id, `Update config:${message}/${user.name}`);
-      this.rabbitmq.sendLegacy('config', id, configDto);
+      this.rabbitmq.sendLegacy('config', id, config);
     }
     await this.redis.del("device");
     await this.redis.del(`config:${id}`);

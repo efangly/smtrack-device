@@ -57,7 +57,7 @@ export class ProbeService {
     }
     if (message !== '') {
       this.rabbitmq.sendHistory(probe.sn, 'update', user.id, `Update probe:${message}/${user.name}`);
-      this.rabbitmq.sendLegacy('probe', probe.sn, probeDto);
+      this.rabbitmq.sendLegacy('probe', probe.sn, probe);
     }
     await this.redis.del('device');
     await this.redis.del('config');
