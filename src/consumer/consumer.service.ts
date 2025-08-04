@@ -84,7 +84,9 @@ export class ConsumerService {
       where: { sn: data.id },
       data: data.probe
     });
+    console.log(data.probe);
     await this.redis.del("device");
+    await this.redis.del('probe');
     await this.redis.del("list");
     await this.redis.del("deviceinfo");
   }
