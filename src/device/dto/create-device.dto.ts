@@ -65,7 +65,7 @@ export class CreateDeviceDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(10)
+  @MaxLength(30)
   firmware: string;
 
   @IsOptional()
