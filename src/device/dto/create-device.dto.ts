@@ -1,97 +1,97 @@
-import { IsString, IsBoolean, MaxLength, IsOptional, IsDate, IsNumber } from 'class-validator';
+import { IsString, IsBoolean, MaxLength, IsOptional, IsDate, IsNumber, IsNotEmpty } from 'class-validator';
 
 export class CreateDeviceDto {
-  @IsOptional()
-  @IsString()
-  @MaxLength(40)
+  @IsNotEmpty({ message: 'Device ID is required' })
+  @IsString({ message: 'Device ID must be a string' })
+  @MaxLength(40, { message: 'Device ID must not exceed 40 characters' })
   id: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
+  @IsString({ message: 'Ward must be a string' })
+  @MaxLength(100, { message: 'Ward must not exceed 100 characters' })
   ward: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(200)
+  @IsString({ message: 'Ward name must be a string' })
+  @MaxLength(200, { message: 'Ward name must not exceed 200 characters' })
   wardName: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
+  @IsString({ message: 'Hospital must be a string' })
+  @MaxLength(100, { message: 'Hospital must not exceed 100 characters' })
   hospital: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(200)
+  @IsString({ message: 'Hospital name must be a string' })
+  @MaxLength(200, { message: 'Hospital name must not exceed 200 characters' })
   hospitalName: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
+  @IsString({ message: 'Static name must be a string' })
+  @MaxLength(100, { message: 'Static name must not exceed 100 characters' })
   staticName: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(50)
+  @IsString({ message: 'Name must be a string' })
+  @MaxLength(50, { message: 'Name must not exceed 50 characters' })
   name: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: 'Status must be a boolean value' })
   status: boolean;
 
   @IsOptional()
-  @IsNumber()
+  @IsNumber({}, { message: 'Sequence must be a number' })
   seq: number;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
+  @IsString({ message: 'Location must be a string' })
+  @MaxLength(255, { message: 'Location must not exceed 255 characters' })
   location: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
+  @IsString({ message: 'Position must be a string' })
+  @MaxLength(255, { message: 'Position must not exceed 255 characters' })
   position: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
+  @IsString({ message: 'Position picture must be a string' })
+  @MaxLength(255, { message: 'Position picture URL must not exceed 255 characters' })
   positionPic: string;
 
   @IsOptional()
-  @IsDate()
+  @IsDate({ message: 'Install date must be a valid date' })
   installDate: Date;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(30)
+  @IsString({ message: 'Firmware must be a string' })
+  @MaxLength(30, { message: 'Firmware version must not exceed 30 characters' })
   firmware: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
+  @IsString({ message: 'Remark must be a string' })
+  @MaxLength(255, { message: 'Remark must not exceed 255 characters' })
   remark: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: 'Online status must be a boolean value' })
   online: boolean;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(100)
+  @IsString({ message: 'Tag must be a string' })
+  @MaxLength(100, { message: 'Tag must not exceed 100 characters' })
   tag: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
+  @IsString({ message: 'Token must be a string' })
+  @MaxLength(255, { message: 'Token must not exceed 255 characters' })
   token: string;
   
-  @IsDate()
+  @IsDate({ message: 'Create date must be a valid date' })
   @IsOptional()
   createAt: Date;
 
-  @IsDate()
+  @IsDate({ message: 'Update date must be a valid date' })
   @IsOptional()
   updateAt: Date;
 }

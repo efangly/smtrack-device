@@ -1,9 +1,10 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { JsonLogger } from '../logger';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  private readonly logger = new JsonLogger();
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -46,7 +47,34 @@ export class AllExceptionsFilter implements ExceptionFilter {
           break;
       }
     }
-    if (status >= 500) this.logger.error(`Http Status: ${status} Error Message: ${message}`);
+    if (status >= 500) {
+      this.logger.logError(
+        `HTTP ${status} Error`,
+        exception instanceof Error ? exception : new Error(message),
+        'AllExceptionsFilter',
+        {
+          status,
+          path: ctx.getRequest()?.url,
+          method: ctx.getRequest()?.method,
+          userAgent: ctx.getRequest()?.headers?.['user-agent'],
+          ip: ctx.getRequest()?.ip,
+        }
+      );
+    } else if (status >= 400) {
+      if (status !== 401) {
+        this.logger.logWarning(
+          `HTTP ${status} Warning: ${message}`,
+          'AllExceptionsFilter',
+          {
+            status,
+            path: ctx.getRequest()?.url,
+            method: ctx.getRequest()?.method,
+            userAgent: ctx.getRequest()?.headers?.['user-agent'],
+            ip: ctx.getRequest()?.ip,
+          }
+        );
+      }
+    }
     response.status(status).json({
       message: message,
       success: false,

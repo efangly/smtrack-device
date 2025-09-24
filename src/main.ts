@@ -4,12 +4,21 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { JsonLogger } from './common/logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new JsonLogger();
+  const app = await NestFactory.create(AppModule, {
+    logger: logger,
+  });
   const reflector = app.get(Reflector);
   app.enableCors({ origin: '*' });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ 
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+    validateCustomDecorators: true
+  }));
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.setGlobalPrefix('devices');
