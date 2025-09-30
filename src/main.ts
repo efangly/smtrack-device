@@ -12,7 +12,6 @@ async function bootstrap() {
     logger: logger,
   });
   const reflector = app.get(Reflector);
-  app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
   app.useGlobalFilters(new AllExceptionsFilter());
