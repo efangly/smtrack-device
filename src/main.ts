@@ -13,12 +13,7 @@ async function bootstrap() {
   });
   const reflector = app.get(Reflector);
   app.enableCors({ origin: '*' });
-  app.useGlobalPipes(new ValidationPipe({ 
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    validateCustomDecorators: true
-  }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
   app.useGlobalFilters(new AllExceptionsFilter());
   app.setGlobalPrefix('devices');
