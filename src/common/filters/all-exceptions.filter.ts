@@ -55,9 +55,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         {
           status,
           path: ctx.getRequest()?.url,
-          method: ctx.getRequest()?.method,
-          userAgent: ctx.getRequest()?.headers?.['user-agent'],
-          ip: ctx.getRequest()?.ip,
+          method: ctx.getRequest()?.method
         }
       );
     } else if (status >= 400) {
@@ -68,9 +66,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           {
             status,
             path: ctx.getRequest()?.url,
-            method: ctx.getRequest()?.method,
-            userAgent: ctx.getRequest()?.headers?.['user-agent'],
-            ip: ctx.getRequest()?.ip,
+            method: ctx.getRequest()?.method
           }
         );
       }

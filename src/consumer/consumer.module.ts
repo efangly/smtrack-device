@@ -7,7 +7,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), 
     ClientsModule.register([
       {
         name: 'ONLINE_SERVICE',

@@ -7,10 +7,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { JsonLogger } from './common/logger';
 
 async function bootstrap() {
-  const logger = new JsonLogger();
-  const app = await NestFactory.create(AppModule, {
-    logger: logger,
-  });
+  const app = await NestFactory.create(AppModule, { logger: new JsonLogger() });
   const reflector = app.get(Reflector);
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));
