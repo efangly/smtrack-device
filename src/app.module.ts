@@ -15,14 +15,10 @@ import { ConsumerModule } from './consumer/consumer.module';
 import { CronModule } from './cron/cron.module';
 import { RabbitmqModule } from './rabbitmq/rabbitmq.module';
 import { AdjustModule } from './adjust/adjust.module';
-import { validate } from './common/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
     PassportModule,
     RedisModule, 
