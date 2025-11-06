@@ -9,12 +9,10 @@ import { JwtPayloadDto } from '../common/dto/payload.dto';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 import { ChangeDeviceDto } from './dto/change-device.dto';
-import { JsonLogger } from '../common/logger';
 
 @Controller('device')
 export class DeviceController {
   constructor(private readonly deviceService: DeviceService) { }
-  private readonly logger = new JsonLogger();
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()

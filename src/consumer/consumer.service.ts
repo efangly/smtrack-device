@@ -51,6 +51,7 @@ export class ConsumerService {
         hospital: result.hospital,
         time: result.online
       });
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
       this.logger.logError(
         'Failed to update device online status',
