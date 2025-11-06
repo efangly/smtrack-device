@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: device
-        image: siamatic/smtrack-device-service:1.2.4
+        image: siamatic/smtrack-device-service:1.2.4-a
         ports:
         - containerPort: 8080
         readinessProbe:
