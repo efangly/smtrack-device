@@ -126,7 +126,7 @@ export class DeviceService {
           probe: true,
           config: true,
           warranty: { select: { expire: true } },
-          log: { take: 1, orderBy: { createAt: 'desc' } }
+          log: { take: 2, orderBy: { createAt: 'desc' } }
         },
         orderBy: { seq: 'asc' }
       }),
