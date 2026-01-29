@@ -46,8 +46,8 @@ model Devices {
 model Probes {
   id                    String   @id @default(uuid())
   sn                    String
-  name                  String?
-  type                  String?
+  name                  String?  @default("P1")
+  type                  String?  @default("SHT-31")
   channel               String   @default("1")
   tempMin               Float    @default(0.00)
   tempMax               Float    @default(0.00)
@@ -55,7 +55,7 @@ model Probes {
   humiMax               Float    @default(0.00)
   tempAdj               Float    @default(0.00)
   humiAdj               Float    @default(0.00)
-  stampTime             String?
+  stampTime             String?  @default("5")
   doorQty               Int      @default(1)
   position              String?
   muteAlarmDuration     String?

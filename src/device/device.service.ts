@@ -52,6 +52,11 @@ export class DeviceService {
           ...deviceDto,
           probe: {
             create: {
+              type: 'SHT-31',
+              name: 'P1',
+              channel: '1',
+              tempMin: 0,
+              humiMin: 0,
               tempMax: 37,
               humiMax: 100,
               createAt: dateFormat(new Date()),
@@ -86,6 +91,8 @@ export class DeviceService {
       await this.redis.del("device");
       await this.redis.del("list");
       await this.redis.del("deviceinfo");
+      await this.redis.del("config");
+      await this.redis.del('probe');
       return result;
     } catch (error) {
       this.logger.logError(
@@ -101,7 +108,9 @@ export class DeviceService {
 
       throw new InternalServerErrorException('Failed to create device');
     }
-  } async findAll(filter: string, wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
+  } 
+  
+  async findAll(filter: string, wardId: string, page: string, perpage: string, user: JwtPayloadDto) {
     const { conditions, key } = this.findCondition(user);
     let search = {} as Prisma.DevicesWhereInput;
     if (filter) {
